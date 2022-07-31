@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "start": "tsc -p tsconfig.json",
+    "start": "tsc -p tsconfig.json && node dist/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

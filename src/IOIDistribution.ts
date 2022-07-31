@@ -1,4 +1,4 @@
-import { TransitionType } from "./score-follower/ScoreFollower"
+import { TransitionType } from "./TransitionType"
 
 /**
  * generate IOI distribution function for chords, arpeggios, 

@@ -26,9 +26,9 @@ type DuplicateOnsetEvent = {
 }
 
 export class HMM {
-	events: HMMEvent[]
-	duplicateOnsets: DuplicateOnsetEvent[]
-	ppq: number
+	events: HMMEvent[] = []
+	duplicateOnsets: DuplicateOnsetEvent[] = []
+	ppq: number = 0
 
 	fromMEI(mei: string) {
 		// TODO create HMM representation of a MEI score

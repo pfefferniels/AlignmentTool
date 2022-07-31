@@ -1,9 +1,5 @@
 
 
-/**
- * @todo: write function to transfer MIDI event into the following structure:
- */
-
 type PianoRollEvent = {
     id: string, 
     ontime: number, 
@@ -21,5 +17,12 @@ type PianoRollEvent = {
 }
 
 export class PianoRoll {
-    events: PianoRollEvent[]
+    events: PianoRollEvent[] = []
+
+    /**
+     * @todo: transfer MIDI into a `PianoRollEvent` array
+     */
+    fromMIDI(midi: string) {
+
+    }
 }

@@ -5,13 +5,7 @@ import { StateType } from "../HMMState"
 import { ioiDistributionFunctions, ioiInsertionDistribution, logIoiSkipDistribution } from "../IOIDistribution"
 import { PianoRoll } from "../PianoRoll"
 import { sitchToPitch } from "../BasicPitchCalculation"
-
-export enum TransitionType {
-	Chord,
-	Arpeggio,
-	ShortAppoggiatura,
-	Trill
-}
+import { TransitionType } from "../TransitionType"
 
 type Pitch = number
 
@@ -34,14 +28,14 @@ export class ScoreFollower {
 	/** 
 	 * pulses per quarter note
 	 */
-	ppq: number
+	ppq: number = 0
 
 	isFirst: boolean = true
 
 	/**
 	 * number of states
 	 */
-	numberOfStates: number
+	numberOfStates: number = 0
 
 	/**
 	 * index of current state
@@ -61,31 +55,31 @@ export class ScoreFollower {
 	previousOnsetTime: number
 	predictedNextTime: number
 
-	tempo: number[]
+	tempo: number[] = []
 
 	/**
 	 * likelihood
 	 */
-	likelihood: number[]
+	likelihood: number[] = []
 
-	amaxHist: number[][]
+	amaxHist: number[][] = []
 
 	/**
 	 * stores pitches at a specific HMM position
 	 */
-	pitchList: number[][]
+	pitchList: number[][] = []
 
-	scorePosList: string[][]
+	scorePosList: string[][] = []
 
 	/**
 	 * the observed pitches are saved here
 	 */
-	inputPitch: number[]
+	inputPitch: number[] = []
 
 	/**
 	 * history of onset times
 	 */
-	timeHist: number[]
+	timeHist: number[]= []
 
 	/**
 	 * Performance HMMs with larger D have larger
@@ -103,15 +97,15 @@ export class ScoreFollower {
 	/**
 	 * stores score time as ticks
 	 */
-	stime: number[]
-	endStime: number[]
-	type: StateType[]
+	stime: number[] = []
+	endStime: number[] = []
+	type: StateType[] = []
 
-	topId: number[]
-	internalId: number[] // determined by an event's internal position
+	topId: number[] = []
+	internalId: number[] = [] // determined by an event's internal position
 
-	pitchClusters: Pitch[][][]
-	voiceClusters: number[][][]
+	pitchClusters: Pitch[][][] = []
+	voiceClusters: number[][][] = []
 
 	/** 
 	 * stores note ID references
@@ -125,9 +119,9 @@ export class ScoreFollower {
 	ioiWeight: Map<TransitionType, number>[]
 	stolenTime: number[]
 
-	pitchLP: LP[]
-	topTransitionLP: LP
-	internalTransitionLP: LP[][]
+	pitchLP: LP[] = []
+	topTransitionLP: LP = []
+	internalTransitionLP: LP[][] = []
 	iniSecPerTick: number
 
 	/**
@@ -363,6 +357,11 @@ export class ScoreFollower {
 	}
 
 	private init() {
+		if (this.numberOfStates <= 0) {
+			console.log('no states')
+			return
+		}
+		
 		this.tickPerSecond = this.initialTickPerSecond
 		this.tempo = []
 		this.tempo.push(this.tickPerSecond)
@@ -371,7 +370,7 @@ export class ScoreFollower {
 		// cf. Nakamura et al. 2015 p. 22
 		this.sigma_v = Math.pow(0.03 / (this.tickPerSecond * this.ppq), 2)
 		this.swSigma_t = [this.sigma_t, Math.pow(0.16, 2)]
-		this.swSecPerTick[1 / this.tickPerSecond, 1 / this.tickPerSecond]
+		this.swSecPerTick = [1 / this.tickPerSecond, 1 / this.tickPerSecond]
 		this.swM = [this.m, this.m]
 
 		this.likelihood = [Math.log(0.9),
