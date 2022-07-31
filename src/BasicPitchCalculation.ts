@@ -26,15 +26,16 @@ export function sitchToPitch(sitch: string): number {
         ['G', 67],
         ['A', 69],
         ['B', 71]
-    ])[sitch[0]]
+    ]).get(sitch[0])
 
     const octave = +sitch[sitch.length-1]
     let p = diatonic + (octave - 4) * 12
 
     const acc = sitch.slice(1, -1)
+
     switch (acc) {
-        case '+': case '#': p += 0; break;
-        case '++': case '##': p += 1; break;
+        case '+': case '#': p += 1; break;
+        case '++': case '##': p += 2; break;
         case '-': case 'b': p -= 1; break;
         case '--': case 'bb': p -= 2; break;
     }
