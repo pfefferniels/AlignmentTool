@@ -1,21 +1,26 @@
 import { StateType } from "./HMMState"
 
+type ClusterNote = {
+	sitch: string, 
+	voice: number, 
+	meiID: string
+}
+
+type Cluster = ClusterNote[]
+
 export type HMMEvent = {
 	scoreTime: number
 	endScoreTime: number
 	internalPosition: number
 	stateType: StateType
-	numClusters: number
+	clusters: Cluster[]
+
 	numSitches: number
 	numCh: number
 	numArp: number
 	numInterCluster: number  // (numClusters-1)
 	//For CH/SA/AN: numSitches=numClusters+numCh+numArp, numInterCluster=numClusters-1
 	//For TR: numSitches=numCh=numArp=numInterCluster=0
-	numNotesPerCluster: number[]
-	sitchesPerCluster: string[][]
-	voicesPerCluster: number[][]
-	meiIDsPerCluster: string[][]
 }
 
 type DuplicateOnsetEvent = {

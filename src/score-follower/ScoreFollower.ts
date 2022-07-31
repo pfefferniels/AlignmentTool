@@ -204,15 +204,11 @@ export class ScoreFollower {
 			this.internalId.push(event.internalPosition)
 			this.type.push(event.stateType)
 
-			let cluster: Pitch[][] = []
-			for (let i = 0; i < event.numClusters; i++) {
-				const pitches: Pitch[] = event.sitchesPerCluster[i].map(sitch => sitchToPitch(sitch))
-				cluster.push(pitches)
-			}
-			this.pitchClusters.push(cluster)
-
-			this.voiceClusters.push(event.voicesPerCluster)
-			this.refClusters.push(event.meiIDsPerCluster)
+			this.pitchClusters.push(event.clusters.map(cluster => {
+				return cluster.map(note => sitchToPitch(note.sitch))
+			}))
+			this.voiceClusters.push(event.clusters.map(cluster => cluster.map(note => note.voice)))
+			this.refClusters.push(event.clusters.map(cluster => cluster.map(note => note.meiID)))
 
 			// 
 			let selfTransitionWeight = new Map<TransitionType, number>([
@@ -229,10 +225,10 @@ export class ScoreFollower {
 				this.stolenTime.push(0.13 * Math.max(event.numArp, event.numInterCluster))
 			}
 			else {
-				for (let i = 0; i < event.numClusters; i++) {
-					selfTransitionWeight[TransitionType.Chord] = event.numNotesPerCluster[i] - 1
+				event.clusters.forEach(cluster => {
+					selfTransitionWeight[TransitionType.Chord] = cluster.length - 1
 					selfTransitionWeight[TransitionType.Trill] = 1
-				}
+				})
 				this.stolenTime.push(0)
 			}
 			normalizeMap(selfTransitionWeight)
@@ -637,14 +633,11 @@ export class ScoreFollower {
 		}
 		return meiId
 	}
-	
+
 	getCorrectSitch(hmmPos: number, meiId: string): string {
-		for (let i = 0; i < this.hmm.events[hmmPos].meiIDsPerCluster.length; i++) {
-			for (let j = 0; j < this.hmm.events[hmmPos].meiIDsPerCluster[i].length; j++) {
-				if (meiId === this.hmm.events[hmmPos].meiIDsPerCluster[i][j]) {
-					return this.hmm.events[hmmPos].sitchesPerCluster[i][j]
-				}
-			}
+		for (const cluster of this.hmm.events[hmmPos].clusters) {
+			const note = cluster.find(note => note.meiID === meiId)
+			if (note) return note.sitch
 		}
 		return ''
 	}
