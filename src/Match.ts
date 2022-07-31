@@ -33,9 +33,9 @@ type MissingNote = {
 }
 
 export class ScorePerformanceMatch {
-    comments: string[]
-    events: ScorePerformanceMatchEvent[]
-    missingNotes: MissingNote[]
+    comments: string[] = []
+    events: ScorePerformanceMatchEvent[] = []
+    missingNotes: MissingNote[] = []
 
     /**
      * @todo serialize `events` and `missingNotes` to whatever format

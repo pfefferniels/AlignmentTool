@@ -10,10 +10,7 @@ type PianoRollEvent = {
     offvel: number, 
     channel: number, 
     endtime: number, //Including pedalling. Not written in spr/ipr files.
-    label: string, 
-    ext1: number, 
-    extVal1: number, 
-    extVal2: number 
+    label: string
 }
 
 export class PianoRoll {

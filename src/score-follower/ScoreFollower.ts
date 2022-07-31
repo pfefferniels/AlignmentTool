@@ -110,14 +110,14 @@ export class ScoreFollower {
 	/** 
 	 * stores note ID references
 	 */
-	refClusters: string[][][]
+	refClusters: string[][][] = []
 
 	/**
 	 * relative IOI weights for each HMM event.
 	 * They always sum up to one, cf. Nakamura 2015, p. 15
 	 */
-	ioiWeight: Map<TransitionType, number>[]
-	stolenTime: number[]
+	ioiWeight: Map<TransitionType, number>[] = []
+	stolenTime: number[] = []
 
 	pitchLP: LP[] = []
 	topTransitionLP: LP = []
@@ -191,6 +191,7 @@ export class ScoreFollower {
 		let d: number[] = new Array<number>(100)
 
 		this.ppq = hmm.ppq
+		this.hmm = hmm
 
 		let curTopId = -1
 		for (const event of hmm.events) {
@@ -203,7 +204,7 @@ export class ScoreFollower {
 			this.internalId.push(event.internalPosition)
 			this.type.push(event.stateType)
 
-			let cluster: Pitch[][]
+			let cluster: Pitch[][] = []
 			for (let i = 0; i < event.numClusters; i++) {
 				const pitches: Pitch[] = event.sitchesPerCluster[i].map(sitch => sitchToPitch(sitch))
 				cluster.push(pitches)
@@ -326,7 +327,7 @@ export class ScoreFollower {
 
 		// internal transition probability
 
-		let selfTrProbability: number[]
+		let selfTrProbability: number[] = []
 		let prevTopId = 0
 
 		for (let i = 0; i < this.numberOfStates; i++) {
@@ -361,7 +362,7 @@ export class ScoreFollower {
 			console.log('no states')
 			return
 		}
-		
+
 		this.tickPerSecond = this.initialTickPerSecond
 		this.tempo = []
 		this.tempo.push(this.tickPerSecond)
