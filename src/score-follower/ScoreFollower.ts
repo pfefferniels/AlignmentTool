@@ -62,7 +62,7 @@ export class ScoreFollower {
 	 */
 	likelihood: number[] = []
 
-	amaxHist: number[][] = []
+	maxPositionHistory: number[][] = []
 
 	/**
 	 * stores pitches at a specific HMM position
@@ -79,7 +79,7 @@ export class ScoreFollower {
 	/**
 	 * history of onset times
 	 */
-	timeHist: number[]= []
+	timeHist: number[] = []
 
 	/**
 	 * Performance HMMs with larger D have larger
@@ -134,7 +134,7 @@ export class ScoreFollower {
 	 * 
 	 * @todo these parameters could vary from rehearsal 
 	 * vs concert-ready situations and should be controllable.
-	 */ 
+	 */
 
 	/**
 	 * noise sources due to motor controls and erroneous timing (e_t)
@@ -160,7 +160,7 @@ export class ScoreFollower {
 		for (let j = 0; j < LP.length; j++) {
 			LP[j] = new Array<number>(102).fill(-1000)
 		}
-		LP[0][1] = Math.log(1 - 0.1)
+		LP[0][1] = Math.log(0.9)
 
 		for (let j = 2; j <= this.internalId[index]; j++) {
 			LP[0][j] = Math.log(0.1 / (this.internalId[index] - 1));
@@ -168,7 +168,7 @@ export class ScoreFollower {
 		logNorm(LP[0])
 
 		for (let j = 1; j <= this.internalId[index]; j++) {
-			const value = selfTrProbability[index + 1 - this.internalId[index] + j - 1]
+			const value = selfTrProbability[(index + 1) - this.internalId[index] + j - 1]
 
 			if (j == this.internalId[index]) {
 				LP[j][j] = Math.log(value)
@@ -242,45 +242,37 @@ export class ScoreFollower {
 		this.lastTickPerSec = this.initialTickPerSecond
 
 		// trill overlaps
+		this.hmm.events.forEach((event, i) => {
+			if (event.stateType !== StateType.Trill || event.internalPosition <= 0) return
 
-		for (let i = 0; i < this.numberOfStates; i++) {
-			if (this.type[i] === StateType.Trill && this.internalId[i] > 1) {
-				{
-					// reorganize pitch clusters based on bottom id
-					const pitches: Pitch[] = this.pitchClusters[i].flat(2)
-					for (let j = i - 1; j >= i - this.internalId[i] + 1; j--) {
-						this.pitchClusters[j].push(pitches)
-					}
-				}
-
-				{
-					// initialize voice clusters with -1 based on bottom id
-					const pitches = new Array<number>(this.pitchClusters[i].flat(2).length).fill(-1)
-					for (let j = i - 1; j >= i - this.internalId[i] + 1; j--) {
-						this.voiceClusters[j].push(pitches)
-					}
-				}
-
-				{
-					// reorganize ID references based on the bottom ID
-					let vs: string[]
-					for (let k = 0; k < this.pitchClusters[i].length; k++) {
-						for (let l = 0; l < this.pitchClusters[i][k].length; l++) {
-							vs.push(this.refClusters[i][k][l])
-						}
-					}
-					for (let j = i-1; j >= i - this.internalId[i] + 1; j--) {
-						this.refClusters[j].push(vs)
-					}
-				}
-
+			// reorganize pitch clusters based on bottom id
+			const pitches = this.pitchClusters[i].flat(2)
+			for (let j = i - 1; j >= i - event.internalPosition+1; j--) {
+				this.pitchClusters[j].push(pitches)
 			}
-		}
+
+			// initialize voice clusters with -1 based on bottom id
+			const voices = new Array<number>(this.pitchClusters[i].flat(2).length).fill(-1)
+			for (let j = i - 1; j >= i - event.internalPosition; j--) {
+				this.voiceClusters[j].push(voices)
+			}
+
+			// reorganize ID references based on the bottom ID
+			let vs: string[]
+			for (let k = 0; k < this.pitchClusters[i].length; k++) {
+				for (let l = 0; l < this.pitchClusters[i][k].length; l++) {
+					vs.push(this.refClusters[i][k][l])
+				}
+			}
+			for (let j = i - 1; j >= i - event.internalPosition+1; j--) {
+				this.refClusters[j].push(vs)
+			}
+		})
 
 		// pitch output probability – describes how players 
 		// actually produce performed notes
 
-		for (let i = 0; i < this.numberOfStates; i++) {
+		this.hmm.events.forEach((event, i) => {
 			const vpitch = this.pitchClusters[i].flat(2)
 			const vref = this.refClusters[i].flat(2)
 			this.pitchList.push(vpitch)
@@ -288,7 +280,7 @@ export class ScoreFollower {
 
 			// all pitches
 			let pitchProbabilities = new Array<number>(128).fill(0.000001)
-			if (this.type[i] !== StateType.Trill) {
+			if (event.stateType !== StateType.Trill) {
 				for (let j = 0; j < this.pitchClusters[i].length; j++) {
 					for (let k = 0; k < this.pitchClusters[i][j].length; k++) {
 						const voice = this.voiceClusters[i][j][k]
@@ -313,13 +305,13 @@ export class ScoreFollower {
 				for (let k = 0; k < this.pitchClusters[i][lastCluster].length; k++) {
 					const voice = this.voiceClusters[i][lastCluster][k]
 					const pitch = this.pitchClusters[i][lastCluster][k]
-					assignProbabilities(pitchProbabilities, pitch, voice < 0)
+					assignProbabilities(pitchProbabilities, pitch, voice < 0, factor)
 				}
 			}
 			normalize(pitchProbabilities)
 			pitchProbabilities = pitchProbabilities.map(value => Math.log(value))
 			this.pitchLP.push(pitchProbabilities)
-		}
+		})
 
 		// internal transition probability
 
@@ -329,14 +321,14 @@ export class ScoreFollower {
 		for (let i = 0; i < this.numberOfStates; i++) {
 			if (this.type[i] !== StateType.Trill) {
 				let d0 = 0
-				for (let j; j < this.pitchClusters[i].length; j++) {
+				for (let j=0; j < this.pitchClusters[i].length; j++) {
 					d0 += this.pitchClusters[i][j].length * (this.voiceClusters[i][j][0] < 0 ? 0.5 : 1)
 				}
 				selfTrProbability.push((d0 - 1 + 0.1) / (d0 + 0.1))
 			}
 			else {
 				const avgClusterSize = this.pitchClusters[i].reduce((prev, curr) => prev + curr.length, 0) / (this.pitchClusters.length - 1)
-				const d0 = Math.min(3, d[1] * (this.iniSecPerTick * (this.endStime[i] - this.stime[i])) / 0.15)
+				const d0 = Math.min(3, avgClusterSize * (this.iniSecPerTick * (this.endStime[i] - this.stime[i])) / 0.15)
 				selfTrProbability.push((d0 - 1 + 0.1) / (d0 + 0.1))
 			}
 			if (prevTopId !== this.topId[i]) {
@@ -393,7 +385,7 @@ export class ScoreFollower {
 		})
 		this.transitionSkipLP = -40 // offline
 
-		this.pitchDiffProb = new Array<number>(256, 1E-20)
+		this.pitchDiffProb = new Array<number>(256).fill(1E-20)
 		assignProbabilities(this.pitchDiffProb, 128)
 		normalize(this.pitchDiffProb)
 	}
@@ -412,6 +404,7 @@ export class ScoreFollower {
 		this.timeHist.push(time)
 		if (this.isFirst) {
 			this.updateInitialLikelihood(observed)
+			this.isFirst = false
 			this.currentOnsetTime = time
 			this.previousOnsetTime = time
 		}
@@ -446,17 +439,17 @@ export class ScoreFollower {
 			// score time difference
 			const nu = this.stime[this.currentState] - this.stime[this.currentState - 1]
 
-			let swk: [[number, number], [number, number]]
-			let swTmpPredSecPerTick: [[number, number], [number, number]]
-			let swDelta: [[number, number], [number, number]]
+			let swk: [[number, number], [number, number]] = [[0,0],[0,0]]
+			let swTmpPredSecPerTick: [[number, number], [number, number]] = [[0,0],[0,0]]
+			let swDelta: [[number, number], [number, number]] = [[0,0],[0,0]]
 			let tmpLPSwitch: number[] = new Array<number>(4); //2*s_{m-1}+s_m=2*r+s
 
-			for (let r=0; r<2; r++) {
-				for (let s=0; s<2; s++) {
-					swk[r][s] = nu * this.swM[r] / (nu**2 * this.swM[r] + this.swSigma_t[s])
+			for (let r = 0; r < 2; r++) {
+				for (let s = 0; s < 2; s++) {
+					swk[r][s] = nu * this.swM[r] / (nu ** 2 * this.swM[r] + this.swSigma_t[s])
 					swTmpPredSecPerTick[r][s] = this.swSecPerTick[r] + swk[r][s] * (ioi - nu * this.swSecPerTick[r]);
 					swDelta[r][s] = (1 - swk[r][s] * nu) * this.swM[r];
-					tmpLPSwitch[2 * r + s] = this.lpLambda[s] + this.lpSwitch[r] - 0.5 * Math.log(2 * Math.PI * (nu * nu * this.swM[r] + this.swSigma_t[s])) - 0.5 * Math.pow(ioi - nu * this.swSecPerTick[r], 2.) / (nu**2 * this.swM[r] + this.swSigma_t[s]);
+					tmpLPSwitch[2 * r + s] = this.lpLambda[s] + this.lpSwitch[r] - 0.5 * Math.log(2 * Math.PI * (nu * nu * this.swM[r] + this.swSigma_t[s])) - 0.5 * Math.pow(ioi - nu * this.swSecPerTick[r], 2.) / (nu ** 2 * this.swM[r] + this.swSigma_t[s]);
 				}
 			}
 			logNorm(tmpLPSwitch)
@@ -466,7 +459,7 @@ export class ScoreFollower {
 				this.swM[s] = (Math.exp(tmpLPSwitch[s]) * (swDelta[0][s] + Math.pow(this.swSecPerTick[s] - swTmpPredSecPerTick[0][s], 2.))
 					+ Math.exp(tmpLPSwitch[2 + s]) * (swDelta[1][s] + Math.pow(this.swSecPerTick[s] - swTmpPredSecPerTick[1][s], 2.)))
 					/ (Math.exp(tmpLPSwitch[s]) + Math.exp(tmpLPSwitch[2 + s]))
-				this.swM[s] += nu**2 * this.sigma_v
+				this.swM[s] += nu ** 2 * this.sigma_v
 				this.lpSwitch[s] = logAdd(tmpLPSwitch[s], tmpLPSwitch[2 + s])
 			}
 			logNorm(this.lpSwitch)
@@ -501,21 +494,21 @@ export class ScoreFollower {
 
 		for (let i = 0; i < this.numberOfStates; i++) {
 			// self transition
-			let am = i
+			let amax = i
 			let max = prevLike[i]
 
 			const probabilitySum = [TransitionType.Chord,
-				TransitionType.Arpeggio,
-				TransitionType.ShortAppoggiatura,
-				TransitionType.Trill].map(transitionType => (
-					this.ioiWeight[i].get(transitionType) * ioiDistributionFunctions.get(transitionType)(ioi)
-				)).reduce((prev, curr) => prev + curr, 0)
-			
+			TransitionType.Arpeggio,
+			TransitionType.ShortAppoggiatura,
+			TransitionType.Trill].map(transitionType => (
+				this.ioiWeight[i].get(transitionType) * ioiDistributionFunctions.get(transitionType)(ioi)
+			)).reduce((prev, curr) => prev + curr, 0)
+
 			max += Math.log(Math.exp(this.internalTransitionLP[this.topId[i]][this.internalId[i]][this.internalId[i]]) * probabilitySum)
 			max += Math.exp(this.topTransitionLP[this.D1] + this.internalTransitionLP[this.topId[i]][this.internalId[i]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]] * ioiInsertionDistribution(ioi))
 
-			let logProbability: number 
-			
+			let logProbability: number
+
 			// forward transition
 			for (let j = i - 1; j >= 0 && j >= i - 12; j--) {
 				if (this.topId[i] - this.topId[j] > this.D2) continue
@@ -530,16 +523,16 @@ export class ScoreFollower {
 					logProbability = prevLike[j] + this.topTransitionLP[this.D1 + this.topId[i] - this.topId[j]] + this.internalTransitionLP[this.topId[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
 						+ Math.log(0.95 * ioiDistributionFunctions.get(TransitionType.ShortAppoggiatura)(ioi) + 0.05 * ioiInsertionDistribution(ioi));
 				} else {
-					let sig = 0.5 + (this.stime[this.topId[i]] - this.endStime[this.topId[j]]) * 0.2 / this.ppq
-					let mu = (this.stime[this.topId[i]] - this.endStime[this.topId[j]]) / this.tickPerSecond - this.stolenTime[j]
-					let ioi2 = time - this.previousOnsetTime
-					if (mu < 0) mu = 0
+					let mu = Math.max(
+						0,
+						(this.stime[this.topId[i]] - this.endStime[this.topId[j]]) / this.tickPerSecond - this.stolenTime[j])
+
 					logProbability = prevLike[j] + this.topTransitionLP[this.D1 + this.topId[i] - this.topId[j]] + this.internalTransitionLP[this.topId[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
-						+ Math.log((0.3 / Math.PI) / (Math.pow(ioi - mu, 2.) + Math.pow(0.3, 2)));//offline
+						+ Math.log((0.3 / Math.PI) / (Math.pow(ioi - mu, 2.) + Math.pow(0.3, 2))); // offline
 				}
 				if (logProbability > max) {
 					max = logProbability;
-					am = j;
+					amax = j;
 				}
 			}
 
@@ -551,7 +544,7 @@ export class ScoreFollower {
 					+ ((ioi > 0.3) ? Math.log(2 * ioiInsertionDistribution(ioi)) : -10)
 				if (logProbability > max) {
 					max = logProbability
-					am = j
+					amax = j
 				}
 			}
 
@@ -560,15 +553,15 @@ export class ScoreFollower {
 				+ ((ioi > 0.3) ? logIoiSkipDistribution(ioi) : -20);
 			if (logProbability > max) {
 				max = logProbability
-				am = this.currentState
+				amax = this.currentState
 			}
 
 			// update
 			this.likelihood[i] = max + this.pitchLP[i][observed.pitch]
-			vi[i] = am
+			vi[i] = amax
 		}
 
-		this.amaxHist.push(vi)
+		this.maxPositionHistory.push(vi)
 		this.inputPitch.push(observed.pitch)
 	}
 
@@ -580,11 +573,11 @@ export class ScoreFollower {
 	 */
 	updateInitialLikelihood(observed: Observation) {
 		let vi = new Array<number>(this.likelihood.length)
-		for (let i=0; i<this.numberOfStates; i++) {
+		for (let i = 0; i < this.numberOfStates; i++) {
 			this.likelihood[i] += this.pitchLP[i][observed.pitch]
 			vi[i] = i
 		}
-		this.amaxHist.push(vi)
+		this.maxPositionHistory.push(vi)
 		this.inputPitch.push(observed.pitch)
 	}
 
@@ -614,7 +607,7 @@ export class ScoreFollower {
 		// pitch at the given HMM position
 		let max = this.pitchDiffProb[pitch - this.pitchList[hmmPos][0] + 128]
 		let maxPosition = 0
-		for (let i=0; i<this.pitchList[hmmPos].length; i++) {
+		for (let i = 0; i < this.pitchList[hmmPos].length; i++) {
 			const currentPitchDiffProb = this.pitchDiffProb[pitch - this.pitchList[hmmPos][i] + 128]
 			if (currentPitchDiffProb > max) {
 				max = currentPitchDiffProb
@@ -623,7 +616,7 @@ export class ScoreFollower {
 		}
 
 		let meiId = this.scorePosList[hmmPos][maxPosition]
-		for (let i=0; i<this.hmm.duplicateOnsets.length; i++) {
+		for (let i = 0; i < this.hmm.duplicateOnsets.length; i++) {
 			for (let j = 1; j < this.hmm.duplicateOnsets[i].numOnsets; j++) {
 				if (meiId === this.hmm.duplicateOnsets[i].meiIDs[j]) {
 					meiId = this.hmm.duplicateOnsets[i].meiIDs[0]
@@ -648,10 +641,10 @@ export class ScoreFollower {
 		this.isFirst = true
 
 		// Viterbi updates
-		for (let n=0; n<pr.events.length; n++) {
+		for (let n = 0; n < pr.events.length; n++) {
 			const observed: Observation = {
 				pitch: pr.events[n].pitch,
-				ioi: n === 0 ? pr.events[n].ontime : (pr.events[n].ontime - pr.events[n-1].ontime)
+				ioi: n === 0 ? pr.events[n].ontime : (pr.events[n].ontime - pr.events[n - 1].ontime)
 			}
 			this.update(observed, pr.events[n].ontime)
 			match.events.push({
@@ -670,12 +663,12 @@ export class ScoreFollower {
 
 		// Backtracking
 		let stateSeq = new Array<number>(pr.events.length) // stores HMM positions
-		stateSeq[stateSeq.length-1] = this.getOptimalState()
-		for (let n=stateSeq.length-2; n>=0; n--) {
-			stateSeq[n] = this.amaxHist[n+1][stateSeq[n+1]]
+		stateSeq[stateSeq.length - 1] = this.getOptimalState()
+		for (let n = stateSeq.length - 2; n >= 0; n--) {
+			stateSeq[n] = this.maxPositionHistory[n + 1][stateSeq[n + 1]]
 		}
 
-		for (let i=0; i<pr.events.length; i++) {
+		for (let i = 0; i < pr.events.length; i++) {
 			const meiId = this.getMeiId(stateSeq[i], pr.events[i].pitch)
 			match.events[i].stime = this.stime[stateSeq[i]]
 			match.events[i].meiId = meiId

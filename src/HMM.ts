@@ -1,12 +1,12 @@
 import { StateType } from "./HMMState"
 
-type ClusterNote = {
+export type ClusterNote = {
 	sitch: string, 
 	voice: number, 
 	meiID: string
 }
 
-type Cluster = ClusterNote[]
+export type Cluster = ClusterNote[]
 
 export type HMMEvent = {
 	scoreTime: number
@@ -33,7 +33,7 @@ type DuplicateOnsetEvent = {
 export class HMM {
 	events: HMMEvent[] = []
 	duplicateOnsets: DuplicateOnsetEvent[] = []
-	ppq: number = 0
+	ppq: number = 4
 
 	fromMEI(mei: string) {
 		// TODO create HMM representation of a MEI score
