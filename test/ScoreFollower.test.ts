@@ -1,125 +1,112 @@
 import { HMM } from "../src/HMM"
 import { StateType } from "../src/HMMState"
+import { ScorePerformanceMatchEvent } from "../src/Match"
 import { PianoRoll } from "../src/PianoRoll"
 import { ScoreFollower } from "../src/score-follower/ScoreFollower"
 
 describe('ScoreFollower', function () {
-    it('aligns two notes', function () {
+    it('constructs a ScoreFollower with a given HMM', function () {
         const hmm = new HMM()
         hmm.events = [
             {
-                scoreTime: 1,
-                endScoreTime: 2,
+                scoreTime: 0,
+                endScoreTime: 3,
                 internalPosition: 1,
                 stateType: StateType.Chord,
                 numCh: 1,
                 numArp: 0,
                 clusters: [
-                    [
-                        {
-                            sitch: 'A4',
-                            meiID: '#meiId1',
-                            voice: 1
-                        }
-                    ]
+                    [{ sitch: 'A3', meiID: '#note1', voice: 3 },
+                    { sitch: 'E4', meiID: '#note2', voice: 2 },
+                    { sitch: 'C#5', meiID: '#note3', voice: 1 }]
                 ],
-                numSitches: 1,
-                numInterCluster: 0,
-            }
-        ]
-        const follower = new ScoreFollower(hmm, 1)
-
-        const pr = new PianoRoll()
-        pr.events = [{
-            ontime: 1.25,
-            offtime: 2.135,
-            id: '123',
-            pitch: 69,
-            sitch: 'A4',
-            onvel: 80,
-            offvel: 80,
-            channel: 1,
-            endtime: 2.5,
-            label: '123'
-        }]
-
-        const result = follower.getMatchResult(pr)
-        expect(result.events[0].meiId).toEqual(hmm.events[0].clusters[0][0].meiID)
-        expect(result.events[0].id).toEqual(pr.events[0].id)
-    })
-
-    it('aligns multiple notes', function () {
-        const hmm = new HMM()
-        hmm.events = [
-            {
-                scoreTime: 1,
-                endScoreTime: 2,
-                internalPosition: 1,
-                stateType: StateType.Chord,
-                numCh: 1,
-                numArp: 0,
-                clusters: [
-                    [
-                        {
-                            sitch: 'A4',
-                            meiID: '#meiId1',
-                            voice: 1
-                        }
-                    ]
-                ],
-                numSitches: 1,
-                numInterCluster: 0,
+                numSitches: 3,
+                numInterCluster: 0
             },
             {
-                scoreTime: 2,
-                endScoreTime: 3,
-                internalPosition: 2,
+                scoreTime: 3,
+                endScoreTime: 4,
+                internalPosition: 1,
                 stateType: StateType.Chord,
                 numCh: 1,
                 numArp: 0,
                 clusters: [
-                    [
-                        {
-                            sitch: 'Ab4',
-                            meiID: '#meiId2',
-                            voice: 1
-                        }
-                    ]
+                    [{ sitch: 'D5', meiID: '#note4', voice: 1 },
+                    { sitch: 'B3', meiID: '#note5', voice: 3 }]
                 ],
-                numSitches: 1,
-                numInterCluster: 0,
+                numSitches: 2,
+                numInterCluster: 0
+            }
+        ]
+        const follower = new ScoreFollower(hmm, 4)
+
+        expect(follower.ppq).toEqual(4)
+        expect(follower.numberOfStates).toEqual(2)
+        expect(follower.isFirst).toEqual(true)
+        expect(follower.currentState).toEqual(0)
+        expect(follower.previousState).toEqual(-1)
+        expect(follower.tickPerSecond).toEqual(1)
+        expect(follower.likelihood.length).toEqual(2)
+        expect(follower.likelihood[0]).toEqual(-0.10536051565782628)
+        expect(follower.likelihood[1]).toEqual(-2.3025850929940455)
+        expect(follower.scorePosList).toEqual([["#note1", "#note2", "#note3"], ["#note4", "#note5"]])
+        expect(follower.stime).toEqual([0, 3])
+        expect(follower.topId).toEqual([0, 1])
+        expect(follower.internalId).toEqual([1, 1])
+        expect(follower.pitchLP.length).toEqual(2)
+        expect(follower.pitchLP[1].findIndex(value => Math.round(value) === -1)).toEqual(59)
+        expect(follower.topTransitionLP.length).toEqual(6)
+    })
+
+    it('aligns PianoRoll and HMM', function () {
+        const hmm = new HMM()
+        hmm.events = [
+            {
+                scoreTime: 0,
+                endScoreTime: 3,
+                internalPosition: 1,
+                stateType: StateType.Chord,
+                numCh: 2,
+                numArp: 0,
+                clusters: [
+                    [{ sitch: 'A3', meiID: '#note1', voice: 3 },
+                    { sitch: 'E4', meiID: '#note2', voice: 2 },
+                    { sitch: 'C#5', meiID: '#note3', voice: 1 }]
+                ],
+                numSitches: 3,
+                numInterCluster: 0
+            },
+            {
+                scoreTime: 3,
+                endScoreTime: 4,
+                internalPosition: 1,
+                stateType: StateType.Chord,
+                numCh: 1,
+                numArp: 0,
+                clusters: [
+                    [{ sitch: 'D5', meiID: '#note4', voice: 1 },
+                    { sitch: 'B3', meiID: '#note5', voice: 3 }]
+                ],
+                numSitches: 2,
+                numInterCluster: 0
             }
         ]
         const follower = new ScoreFollower(hmm, 1)
 
         const pr = new PianoRoll()
-        pr.events = [{
-            ontime: 1.25,
-            offtime: 2.135,
-            id: '000',
-            pitch: 69,
-            sitch: 'A4',
-            onvel: 80,
-            offvel: 80,
-            channel: 1,
-            endtime: 2.5,
-            label: '000'
-        }, {
-            ontime: 2.00,
-            offtime: 2.75,
-            id: '001',
-            pitch: 68,
-            sitch: 'Ab4',
-            onvel: 80,
-            offvel: 80,
-            channel: 1,
-            endtime: 3.1,
-            label: '001'
-        }]
+        pr.events =
+            [
+                { ontime: 1.008333, offtime: 2.307292, id: '001', pitch: 73, sitch: 'C#5', onvel: 80, offvel: 80, channel: 1, endtime: 2.5, label: '001' },
+                { ontime: 1.025000, offtime: 2.333333, id: '002', pitch: 57, sitch: 'A3', onvel: 80, offvel: 80, channel: 1, endtime: 2.5, label: '002' },
+                { ontime: 1.037500, offtime: 2.584375, id: '003', pitch: 64, sitch: 'E4', onvel: 80, offvel: 80, channel: 1, endtime: 2.5, label: '003' },
+                { ontime: 2.445833, offtime: 2.595833, id: '004', pitch: 59, sitch: 'B3', onvel: 80, offvel: 80, channel: 1, endtime: 2.5, label: '004' },
+                { ontime: 2.458333, offtime: 2.604167, id: '005', pitch: 74, sitch: 'D5', onvel: 80, offvel: 80, channel: 1, endtime: 2.5, label: '005' },
+            ]
 
         const result = follower.getMatchResult(pr)
-        console.log(result.events)
-    })
 
+        expect(result.events.map(event => event.meiId)).toEqual(['#note3', '#note1', '#note2', '#note5', '#note4'])
+        expect(result.events.map(event => event.id)).toEqual(['001', '002', '003', '004', '005'])
+    })
 })
 
