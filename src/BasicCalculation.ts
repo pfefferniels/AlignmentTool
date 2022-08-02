@@ -20,6 +20,7 @@ export function normalize(vd: number[]) {
  */
 export function normalizeMap<K>(map: Map<K, number>) {
     let values = [...map.values()]
+    normalize(values)
     let keys = [...map.keys()]
     for (let i=0; i<keys.length; i++) {
         map.set(keys[i], values[i])
