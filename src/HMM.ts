@@ -8,19 +8,41 @@ export type ClusterNote = {
 
 export type Cluster = ClusterNote[]
 
-export type HMMEvent = {
+export class HMMEvent {
 	scoreTime: number
 	endScoreTime: number
 	internalPosition: number
 	stateType: StateType
 	clusters: Cluster[]
-
-	numSitches: number
-	numCh: number
 	numArp: number
-	numInterCluster: number  // (numClusters-1)
-	//For CH/SA/AN: numSitches=numClusters+numCh+numArp, numInterCluster=numClusters-1
-	//For TR: numSitches=numCh=numArp=numInterCluster=0
+
+	constructor(scoreTime: number, endScoreTime: number, clusters: Cluster[], stateType = StateType.Chord, internalPosition = 1, numArp = 0) {
+		this.scoreTime = scoreTime
+		this.endScoreTime = endScoreTime
+		this.clusters = clusters
+		this.stateType = stateType
+		this.internalPosition = internalPosition
+		this.numArp = numArp
+	}
+
+	numSitches() {
+		if (this.stateType === StateType.Trill) return 0
+		return this.clusters.flat().length
+	}
+
+	numClusters() {
+		return this.clusters.length
+	}
+
+	numCh() {
+		if (this.stateType === StateType.Trill) return 0
+		return this.numSitches() - this.numClusters() - this.numArp
+	}
+
+	numInterCluster() {
+		if (this.stateType === StateType.Trill) return 0
+		return this.numClusters() - 1
+	}
 }
 
 type DuplicateOnsetEvent = {

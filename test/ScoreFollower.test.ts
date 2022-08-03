@@ -1,6 +1,4 @@
-import { HMM } from "../src/HMM"
-import { StateType } from "../src/HMMState"
-import { ScorePerformanceMatchEvent } from "../src/Match"
+import { HMM, HMMEvent } from "../src/HMM"
 import { PianoRoll } from "../src/PianoRoll"
 import { ScoreFollower } from "../src/score-follower/ScoreFollower"
 
@@ -8,36 +6,14 @@ describe('ScoreFollower', function () {
     it('constructs a ScoreFollower with a given HMM', function () {
         const hmm = new HMM()
         hmm.events = [
-            {
-                scoreTime: 0,
-                endScoreTime: 3,
-                internalPosition: 1,
-                stateType: StateType.Chord,
-                numCh: 1,
-                numArp: 0,
-                clusters: [
-                    [{ sitch: 'A3', meiID: '#note1', voice: 3 },
-                    { sitch: 'E4', meiID: '#note2', voice: 2 },
-                    { sitch: 'C#5', meiID: '#note3', voice: 1 }]
-                ],
-                numSitches: 3,
-                numInterCluster: 0
-            },
-            {
-                scoreTime: 3,
-                endScoreTime: 4,
-                internalPosition: 1,
-                stateType: StateType.Chord,
-                numCh: 1,
-                numArp: 0,
-                clusters: [
-                    [{ sitch: 'D5', meiID: '#note4', voice: 1 },
-                    { sitch: 'B3', meiID: '#note5', voice: 3 }]
-                ],
-                numSitches: 2,
-                numInterCluster: 0
-            }
-        ]
+            new HMMEvent(0, 3, [
+                [{ sitch: 'A3', meiID: '#note1', voice: 3 },
+                { sitch: 'E4', meiID: '#note2', voice: 2 },
+                { sitch: 'C#5', meiID: '#note3', voice: 1 }]]),
+            new HMMEvent(3, 4, [
+                [{ sitch: 'D5', meiID: '#note4', voice: 1 },
+                { sitch: 'B3', meiID: '#note5', voice: 3 }]
+            ])]
         const follower = new ScoreFollower(hmm, 4)
 
         expect(follower.ppq).toEqual(4)
@@ -61,36 +37,15 @@ describe('ScoreFollower', function () {
     it('aligns PianoRoll and HMM', function () {
         const hmm = new HMM()
         hmm.events = [
-            {
-                scoreTime: 0,
-                endScoreTime: 3,
-                internalPosition: 1,
-                stateType: StateType.Chord,
-                numCh: 2,
-                numArp: 0,
-                clusters: [
-                    [{ sitch: 'A3', meiID: '#note1', voice: 3 },
-                    { sitch: 'E4', meiID: '#note2', voice: 2 },
-                    { sitch: 'C#5', meiID: '#note3', voice: 1 }]
-                ],
-                numSitches: 3,
-                numInterCluster: 0
-            },
-            {
-                scoreTime: 3,
-                endScoreTime: 4,
-                internalPosition: 1,
-                stateType: StateType.Chord,
-                numCh: 1,
-                numArp: 0,
-                clusters: [
-                    [{ sitch: 'D5', meiID: '#note4', voice: 1 },
-                    { sitch: 'B3', meiID: '#note5', voice: 3 }]
-                ],
-                numSitches: 2,
-                numInterCluster: 0
-            }
-        ]
+            new HMMEvent(0, 3, [
+                [{ sitch: 'A3', meiID: '#note1', voice: 3 },
+                { sitch: 'E4', meiID: '#note2', voice: 2 },
+                { sitch: 'C#5', meiID: '#note3', voice: 1 }]]),
+            new HMMEvent(3, 4, [
+                [{ sitch: 'D5', meiID: '#note4', voice: 1 },
+                { sitch: 'B3', meiID: '#note5', voice: 3 }]
+            ])]
+
         const follower = new ScoreFollower(hmm, 1)
 
         const pr = new PianoRoll()

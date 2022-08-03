@@ -7,8 +7,6 @@ import { PianoRoll } from "../PianoRoll"
 import { sitchToPitch } from "../BasicPitchCalculation"
 import { TransitionType } from "../TransitionType"
 
-type Pitch = number
-
 type Observation = {
 	/**
 	 * inter-onset interval
@@ -202,10 +200,10 @@ export class ScoreFollower {
 			])
 
 			if (event.stateType !== StateType.Trill) {
-				selfTransitionWeight.set(TransitionType.Chord, selfTransitionWeight.get(TransitionType.Chord) + event.numCh)
+				selfTransitionWeight.set(TransitionType.Chord, selfTransitionWeight.get(TransitionType.Chord) + event.numCh())
 				selfTransitionWeight.set(TransitionType.Arpeggio, selfTransitionWeight.get(TransitionType.Arpeggio) + event.numArp)
-				selfTransitionWeight.set(TransitionType.ShortAppoggiatura, selfTransitionWeight.get(TransitionType.ShortAppoggiatura) + event.numInterCluster)
-				this.stolenTime.push(0.13 * Math.max(event.numArp, event.numInterCluster))
+				selfTransitionWeight.set(TransitionType.ShortAppoggiatura, selfTransitionWeight.get(TransitionType.ShortAppoggiatura) + event.numInterCluster())
+				this.stolenTime.push(0.13 * Math.max(event.numArp, event.numInterCluster()))
 			}
 			else {
 				event.clusters.forEach(cluster => {
