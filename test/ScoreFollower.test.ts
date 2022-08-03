@@ -37,7 +37,6 @@ describe('ScoreFollower', function () {
         expect(follower.likelihood.length).toEqual(2)
         expect(follower.likelihood[0]).toEqual(-0.10536051565782628)
         expect(follower.likelihood[1]).toEqual(-2.3025850929940455)
-        expect(follower.scorePosList).toEqual([["#note1", "#note2", "#note3"], ["#note4", "#note5"]])
         expect(follower.stime).toEqual([0, 3])
         expect(follower.topId).toEqual([0, 1])
         expect(follower.internalId).toEqual([1, 1])
