@@ -31,13 +31,7 @@ describe('ScoreFollower', function () {
 
         expect(follower.ppq).toEqual(4)
         expect(follower.numberOfStates).toEqual(2)
-        expect(follower.isFirst).toEqual(true)
-        expect(follower.currentState).toEqual(0)
-        expect(follower.previousState).toEqual(-1)
-        expect(follower.tickPerSecond).toEqual(1)
-        expect(follower.likelihood.length).toEqual(2)
-        expect(follower.likelihood[0]).toEqual(-0.10536051565782628)
-        expect(follower.likelihood[1]).toEqual(-2.3025850929940455)
+        expect(follower.likelihood).toEqual([-0.10536051565782628, -2.3025850929940455])
         expect(follower.stime).toEqual([0, 3])
         expect(follower.topId).toEqual([0, 1])
         expect(follower.internalId).toEqual([1, 1])
@@ -99,7 +93,6 @@ describe('ScoreFollower', function () {
                 { ontime: 2.387, offtime: 3.561, id: '2', pitch: 72, sitch: 'C5', onvel: 80, offvel: 80, channel: 1 },
                 { ontime: 3.122, offtime: 3.556, id: '3', pitch: 56, sitch: 'G#3', onvel: 80, offvel: 80, channel: 1 },
                 { ontime: 3.779, offtime: 4.308, id: '4', pitch: 66, sitch: 'F#4', onvel: 80, offvel: 80, channel: 1 },
-                //{ ontime: 3.780, offtime: 4.311, id: '4', pitch: 61, sitch: 'C#4', onvel: 80, offvel: 80, channel: 1 }
             ]
 
         const result = follower.getMatchResult(pr)

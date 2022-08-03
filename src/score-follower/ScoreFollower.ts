@@ -15,8 +15,6 @@ type Observation = {
 	pitch: number
 }
 
-type LP = number[]
-
 export class ScoreFollower {
 	/**
 	 * score HMM
@@ -56,7 +54,7 @@ export class ScoreFollower {
 	tempo: number[] = []
 
 	/**
-	 * likelihood
+	 * likelihood for each state
 	 */
 	likelihood: number[] = []
 
@@ -101,8 +99,8 @@ export class ScoreFollower {
 	ioiWeight: Map<TransitionType, number>[] = []
 	stolenTime: number[] = []
 
-	topTransitionLP: LP = []
-	internalTransitionLP: LP[][] = []
+	topTransitionLP: number[] = []
+	internalTransitionLP: number[][][] = []
 	iniSecPerTick: number
 
 	/**
