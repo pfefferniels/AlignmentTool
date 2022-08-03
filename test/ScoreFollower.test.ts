@@ -2,6 +2,18 @@ import { HMM, HMMEvent } from "../src/HMM"
 import { PianoRoll } from "../src/PianoRoll"
 import { ScoreFollower } from "../src/score-follower/ScoreFollower"
 
+describe('HMMEvent', function() {
+    it('constructs an HMMEvent', function() {
+        const event = new HMMEvent(3, 4, [
+            [{ sitch: 'D5', meiID: '#note4', voice: 1 },
+            { sitch: 'B3', meiID: '#note5', voice: 3 }]
+        ])
+
+        expect(event.numSitches()).toEqual(2)
+        expect(event.pitchProbabilities.findIndex(value => Math.round(value) === -1)).toEqual(59)
+    })
+})
+
 describe('ScoreFollower', function () {
     it('constructs a ScoreFollower with a given HMM', function () {
         const hmm = new HMM()
@@ -29,8 +41,6 @@ describe('ScoreFollower', function () {
         expect(follower.stime).toEqual([0, 3])
         expect(follower.topId).toEqual([0, 1])
         expect(follower.internalId).toEqual([1, 1])
-        expect(follower.pitchLP.length).toEqual(2)
-        expect(follower.pitchLP[1].findIndex(value => Math.round(value) === -1)).toEqual(59)
         expect(follower.topTransitionLP.length).toEqual(6)
     })
 

@@ -108,7 +108,6 @@ export class ScoreFollower {
 	ioiWeight: Map<TransitionType, number>[] = []
 	stolenTime: number[] = []
 
-	pitchLP: LP[] = []
 	topTransitionLP: LP = []
 	internalTransitionLP: LP[][] = []
 	iniSecPerTick: number
@@ -238,44 +237,14 @@ export class ScoreFollower {
 			}
 		})
 
-		// pitch output probability – describes how players 
-		// actually produce performed notes
-
 		this.hmm.events.forEach((event, i) => {
 			const allPitchesAtEvent = event.clusters.flat().map(note => sitchToPitch(note.sitch))
 			const allRefsAtEvent = event.clusters.flat().map(note => note.meiID)
 			this.pitchList.push(allPitchesAtEvent)
 			this.scorePosList.push(allRefsAtEvent)
-
-			// all pitches
-			let pitchProbabilities = new Array<number>(128).fill(0.000001)
-			if (event.stateType !== StateType.Trill) {
-				event.clusters.forEach(cluster => {
-					cluster.forEach(note => {
-						assignProbabilities(pitchProbabilities, sitchToPitch(note.sitch), note.voice < 0)
-					})
-				})
+			if (event.stateType === StateType.Trill) {
+				event.recalculatePitchProbabilities(this.iniSecPerTick)
 			}
-			else {
-				event.clusters.forEach((cluster, clusterIndex) => {
-					// special treatment for the last cluster
-					if (clusterIndex === event.clusters.length-1) {
-						const nClusters = event.clusters.length - 1
-						const factor = 1 / (nClusters * this.iniSecPerTick * (event.endScoreTime - event.scoreTime / 0.15))
-						cluster.forEach(note => {
-							assignProbabilities(pitchProbabilities, sitchToPitch(note.sitch), note.voice < 0, factor)
-						})
-					}
-					else {
-						cluster.forEach(note => {
-							assignProbabilities(pitchProbabilities, sitchToPitch(note.sitch), note.voice < 0)
-						})
-					}
-				})
-			}
-			normalize(pitchProbabilities)
-			pitchProbabilities = pitchProbabilities.map(value => Math.log(value))
-			this.pitchLP.push(pitchProbabilities)
 		})
 
 		// internal transition probability
@@ -526,7 +495,7 @@ export class ScoreFollower {
 			}
 
 			// update
-			this.likelihood[i] = max + this.pitchLP[i][observed.pitch]
+			this.likelihood[i] = max + event.pitchProbabilities[observed.pitch]
 			vi[i] = amax
 		}
 
@@ -542,10 +511,10 @@ export class ScoreFollower {
 	 */
 	updateInitialLikelihood(observed: Observation) {
 		let vi = new Array<number>(this.likelihood.length)
-		for (let i = 0; i < this.numberOfStates; i++) {
-			this.likelihood[i] += this.pitchLP[i][observed.pitch]
+		this.hmm.events.forEach((event, i) => {
+			this.likelihood[i] = event.pitchProbabilities[observed.pitch]
 			vi[i] = i
-		}
+		})
 		this.maxPositionHistory.push(vi)
 		this.inputPitch.push(observed.pitch)
 	}
