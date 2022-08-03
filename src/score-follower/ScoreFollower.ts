@@ -63,13 +63,6 @@ export class ScoreFollower {
 	maxPositionHistory: number[][] = []
 
 	/**
-	 * stores pitches at a specific HMM position
-	 */
-	pitchList: number[][] = []
-
-	scorePosList: string[][] = []
-
-	/**
 	 * the observed pitches are saved here
 	 */
 	inputPitch: number[] = []
@@ -237,14 +230,8 @@ export class ScoreFollower {
 			}
 		})
 
-		this.hmm.events.forEach((event, i) => {
-			const allPitchesAtEvent = event.clusters.flat().map(note => sitchToPitch(note.sitch))
-			const allRefsAtEvent = event.clusters.flat().map(note => note.meiID)
-			this.pitchList.push(allPitchesAtEvent)
-			this.scorePosList.push(allRefsAtEvent)
-			if (event.stateType === StateType.Trill) {
-				event.recalculatePitchProbabilities(this.iniSecPerTick)
-			}
+		this.hmm.events.filter(event => event.stateType === StateType.Trill).forEach(event => {
+			event.recalculatePitchProbabilities(this.iniSecPerTick)
 		})
 
 		// internal transition probability
@@ -543,17 +530,15 @@ export class ScoreFollower {
 	getMeiId(hmmPos: number, pitch: number) {
 		// find maximum pitch probability relative to the given
 		// pitch at the given HMM position
-		let max = this.pitchDiffProb[pitch - this.pitchList[hmmPos][0] + 128]
-		let maxPosition = 0
-		for (let i = 0; i < this.pitchList[hmmPos].length; i++) {
-			const currentPitchDiffProb = this.pitchDiffProb[pitch - this.pitchList[hmmPos][i] + 128]
-			if (currentPitchDiffProb > max) {
-				max = currentPitchDiffProb
-				maxPosition = i
-			}
-		}
+		const allNotesAtPosition = this.hmm.events[hmmPos].clusters.flat()
 
-		let meiId = this.scorePosList[hmmPos][maxPosition]
+		const pitchProbabilities = allNotesAtPosition.map(note => {
+			const currentPitch = sitchToPitch(note.sitch)
+			return this.pitchDiffProb[pitch - currentPitch + 128]
+		})
+		const maxPosition = pitchProbabilities.indexOf(Math.max(...pitchProbabilities))
+
+		let meiId = allNotesAtPosition[maxPosition].meiID
 		for (const duplicate of this.hmm.duplicateOnsets) {
 			for (let j = 1; j < duplicate.numOnsets; j++) {
 				if (meiId === duplicate.meiIDs[j]) {
