@@ -8,9 +8,9 @@ type PianoRollEvent = {
     sitch: string,
     onvel: number, 
     offvel: number, 
-    channel: number, 
-    endtime: number, //Including pedalling. Not written in spr/ipr files.
-    label: string
+    channel: number,
+    endtime?: number, // Including pedalling. TODO: Is this used anywhere?
+    label?: string // TODO: Is this used anywhere?
 }
 
 export class PianoRoll {

@@ -8,7 +8,7 @@
 export function pitchToSitch(p: number): string {
     let q = (p + 120) % 12
     const pitchNames = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B']
-    return pitchNames[q] + (p / 12 - 1).toString()
+    return pitchNames[q] + Math.trunc(p / 12 - 1).toString()
 }
 
 /**

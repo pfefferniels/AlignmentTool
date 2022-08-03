@@ -1,3 +1,6 @@
+import { HMM } from "../HMM"
+import { ScorePerformanceMatch } from "../Match"
+
 function errLP(pitchError: number) {
     const errMap = new Map<number, number>([
         [0, -0.0512932], 
@@ -18,52 +21,49 @@ function errLP(pitchError: number) {
     errMap.get(Math.abs(pitchError)) || -30
 }
 
-/*
+/**
+ * This function 
+ * - identifies missing notes in the match and appends them to the `missingNotes` field
+ * 
+ * @param hmm 
+ * @param match 
+ */
+export function detectErrors(hmm: HMM, match: ScorePerformanceMatch) {
+	// find the position of a matched note in 
+	// the HMM data structure
+	const hmmPositions = []
+	match.events.forEach(matchEvent => {
+		const index = hmm.events.findIndex(hmmEvent => {
+			return hmmEvent.clusters.flat().find(note => note.meiID === matchEvent.meiId) &&
+				   hmmEvent.scoreTime === matchEvent.stime
+		})
+		hmmPositions.push(index)
+	})
 
-int main(int argc, char** argv){
+	// identify missing notes
+	match.missingNotes = []
+	hmm.events.forEach(hmmEvent => {
+		hmmEvent.clusters.flat().forEach(scoreNote => {
+			// do not continue searching if this score note
+			// is one of the duplicate notes
+			// if (duplicateMeiIds.find(scoreNote.meiId)) return
+			
+			const correspondingMatch = match.events.find(match => match.meiId === scoreNote.meiID)
+			if (!correspondingMatch) {
+				match.missingNotes.push({
+					stime: hmmEvent.scoreTime,
+					meiId: scoreNote.meiID
+				})
+			}
+		})
+	})
+}
+
+/*
 	vector<int> v(100);
 	vector<double> d(100);
 	vector<string> s(100);
 	stringstream ss;
-	clock_t start, end;
-	start = clock();
-
-	if(argc!=6){
-		cout<<"Error in usage: $./this in_fmt3x.txt in_hmm.txt in_match.txt out_witherror_match.txt realignemnt(0:no/1:yes)"<<endl;
-		return -1;
-	}//endif
-
-	string fmt3FileName=string(argv[1]);
-	string hmmFileName=string(argv[2]);
-	string in_matchFileName=string(argv[3]);
-	string out_witherror_matchFileName=string(argv[4]);
-	bool realignment=((atoi(argv[5])==0)? false:true);
-
-	Fmt3x fmt3;
-	Hmm hmm;
-	ScorePerfmMatch match;
-	fmt3.ReadFile(fmt3FileName);
-	hmm.ReadFile(hmmFileName);
-	match.ReadFile(in_matchFileName);
-
-	vector<int> hmmStateIDs(match.evts.size());
-	int foundID=-1;
-	for(int n=0;n<match.evts.size();n+=1){
-		foundID=-1;
-		for(int i=0;i<hmm.evts.size();i+=1){
-			if(foundID>=0){break;}
-			if(hmm.evts[i].stime!=match.evts[n].stime){continue;}
-			for(int j=0;j<hmm.evts[i].fmt1IDsPerCluster.size();j+=1){
-				for(int k=0;k<hmm.evts[i].fmt1IDsPerCluster[j].size();k+=1){
-					if(hmm.evts[i].fmt1IDsPerCluster[j][k]==match.evts[n].fmt1ID){
-						foundID=i;
-					}//endif
-				}//endfor k
-			}//endfor j
-		}//endfor i
-		if(foundID<0){assert(false);}
-		hmmStateIDs[n]=foundID;
-	}//endfor n
 
 	/// Aligned clusters
 	vector<vector<int> > hmmID_noteID;//hmmID_noteID[][0,1,2]=hmmID,noteID,0(normal)/1(extra)
@@ -272,20 +272,6 @@ if(printOn){cout<<n<<endl;}
 }//
 		stable_sort(perfmClusterContent.begin(), perfmClusterContent.end(), LessPerfmNote());
 
-if(printOn){
-//####################################################################################
-cout<<"-----------------------------------------------"<<endl;
-cout<<"### scoreClusterContent ###"<<endl;
-	for(int m=0;m<scoreClusterContent.size();m+=1){
-		scoreClusterContent[m].Print();
-	}//endfor m
-cout<<"### perfmClusterContent ###"<<endl;
-	for(int m=0;m<perfmClusterContent.size();m+=1){
-		perfmClusterContent[m].Print();
-	}//endfor m
-//####################################################################################
-}
-
 
 		/// Select best synchronised performed note for each pitch -> others are extra notes
 		/// Identify correct notes
@@ -376,23 +362,6 @@ cout<<"### perfmClusterContent 2 ###"<<endl;
 				}//endif
 			}//endfor m
 
-if(printOn){
-//####################################################################################
-cout<<"l,minPitch,maxPitch : "<<l<<"\t"<<minPitch<<"\t"<<maxPitch<<endl;
-cout<<"### SCIDs ###"<<endl;
-	for(int m=0;m<SCIDs.size();m+=1){
-cout<<SCIDs[m]<<"\t";
-	}//endfor m
-cout<<endl;
-cout<<"### PCIDs ###"<<endl;
-	for(int m=0;m<PCIDs.size();m+=1){
-cout<<PCIDs[m]<<"\t";
-	}//endfor m
-cout<<endl;
-//####################################################################################
-}
-
-
 			if(PCIDs.size()==0){continue;}
 			if(SCIDs.size()==0){
 				for(int mm=0;mm<PCIDs.size();mm+=1){
@@ -480,46 +449,11 @@ cout<<endl;
 				match.evts[perfmClusterContent[m].noteID].errorInd=1;
 			}else{//never reach here
 
-if(printOn){cout<<n<<"\t"<<"!!!!!"<<endl;}
-
 				assert(false);
 			}//endif
 		}//endfor m
 
 	}//endfor n
-
-
-	//// Identify missing notes
-{
-	match.missingNotes.clear();
-	MissingNote missingNote;
-	for(int i=0;i<fmt3.evts.size();i+=1){
-		if(fmt3.evts[i].eventtype=="rest"){continue;}
-		for(int j=0;j<fmt3.evts[i].fmt1IDs.size();j+=1){
-			bool duplicate=false;
-			for(int k=0;k<duplicateFmt1IDs.size();k+=1){
-				if(fmt3.evts[i].fmt1IDs[j]==duplicateFmt1IDs[k]){
-					duplicate=true;
-					break;
-				}//endif
-			}//endif
-			if(duplicate){continue;}
-
-			bool found=false;
-			for(int n=0;n<match.evts.size();n+=1){
-				if(match.evts[n].fmt1ID==fmt3.evts[i].fmt1IDs[j]){
-					found=true;
-					break;
-				}//endif
-			}//endfor n
-			if(!found){
-				missingNote.stime=fmt3.evts[i].stime;
-				missingNote.fmt1ID=fmt3.evts[i].fmt1IDs[j];
-				match.missingNotes.push_back(missingNote);
-			}//endif
-		}//endfor j
-	}//endfor i
-}//
 
 	ss.str(""); ss<<" fmt3x: "<<fmt3FileName;
 	match.comments.push_back(ss.str());

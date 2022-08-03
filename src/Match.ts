@@ -27,7 +27,7 @@ export type ScorePerformanceMatchEvent = {
     skipIndex: string // todo: 0(beginning)/1(resumption point)/- or +(otherwise)
 }
 
-type MissingNote = {
+export type MissingNote = {
     stime: number, 
     meiId: string
 }
