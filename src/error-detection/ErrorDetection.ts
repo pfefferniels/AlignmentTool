@@ -169,9 +169,6 @@ export function detectErrors(hmm: HMM, match: ScorePerformanceMatch) {
 
 
 	for(int n=0;n<hmmID_noteID.size();n+=1){
-
-if(printOn){cout<<n<<endl;}
-
 		int nextClusterNoteID;
 		if(n==hmmID_noteID.size()-1){nextClusterNoteID=match.evts.size();
 		}else{nextClusterNoteID=hmmID_noteID[n+1][1];}//endif
@@ -316,20 +313,6 @@ if(printOn){cout<<n<<endl;}
 				perfmClusterContent.erase(perfmClusterContent.begin()+m);
 			}//endif
 		}//endfor m
-
-
-if(printOn){
-//####################################################################################
-cout<<"### scoreClusterContent 2 ###"<<endl;
-	for(int m=0;m<scoreClusterContent.size();m+=1){
-		scoreClusterContent[m].Print();
-	}//endfor m
-cout<<"### perfmClusterContent 2 ###"<<endl;
-	for(int m=0;m<perfmClusterContent.size();m+=1){
-		perfmClusterContent[m].Print();
-	}//endfor m
-//####################################################################################
-}
 
 		/// Identify pitch error or extra note
 		int scoreClusterSize=scoreClusterContent.size();

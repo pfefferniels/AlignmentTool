@@ -86,7 +86,7 @@ describe('ScoreFollower', function () {
             ]),
             new HMMEvent(4, 4.5, [
                 [{ sitch: 'C4', meiID: '#m-62', voice: 2 },
-                 { sitch: 'F#4', meiID: 'm-64', voice: 3 }]
+                 { sitch: 'F#4', meiID: '#m-64', voice: 3 }]
             ])
         ]
 
@@ -106,6 +106,7 @@ describe('ScoreFollower', function () {
 
         detectErrors(hmm, result)
 
+        expect(result.events.map(event => event.meiId)).toEqual(['#m-56', '#m-46', '#m-60', '#m-64'])
         expect(result.missingNotes).toEqual([{ stime: 4, meiId: '#m-62'}])
     })
 })
