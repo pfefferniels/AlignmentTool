@@ -1,8 +1,18 @@
 import { mean } from "../BasicCalculation"
 
-class TempoTracker {
+/**
+ * Aligns score times with onset times of a performance.
+ * In case of multiple notes per score time it stores the
+ * mean value of the corresponding onset times.
+ */
+export class TempoTracker {
     refScoreTimes: number[]
     refTimes: number[]
+
+    constructor() {
+        this.refScoreTimes = []
+        this.refTimes = []
+    }
 
     /**
      * Calculates averaged tempo data
@@ -10,7 +20,7 @@ class TempoTracker {
      * @param observedScoreTimes 
      * @param observedTimes 
      */
-    setData(observedScoreTimes: number[], observedTimes: []) {
+    setData(observedScoreTimes: number[], observedTimes: number[]) {
         if (observedScoreTimes.length !== observedTimes.length) {
             throw new Error("observedScoreTimes and observedTimes must be of same length")
         }
@@ -18,6 +28,7 @@ class TempoTracker {
         this.refScoreTimes = []
         this.refTimes = []
 
+        //
         let currentScoreTime = observedScoreTimes[0]
         let timesCache: number[] = []
         for (let i=0; i<observedScoreTimes.length; i++) {
@@ -35,10 +46,15 @@ class TempoTracker {
         this.refTimes.push(mean(timesCache))
     }
 
+    /**
+     * Get the (estimated) onset time of a given score time.
+     * @param scoreTime 
+     * @returns 
+     */
     getTime(scoreTime: number) {
         const pos = this.refScoreTimes.findIndex((value) => value > scoreTime)
 
-        // pos not found -- the given scoreTime is above or equal to max
+        // pos not found – the given scoreTime is above or equal to max
         if (pos < 0) {
             // last element
             if (scoreTime === this.refScoreTimes[this.refScoreTimes.length-1]) {
