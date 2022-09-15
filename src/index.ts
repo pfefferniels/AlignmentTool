@@ -1,5 +1,5 @@
 export { HMM, HMMEvent } from "./HMM"
 export { PianoRoll } from "./PianoRoll"
 export { ScoreFollower } from "./score-follower/ScoreFollower"
-export { detectErrors } from "./error-detection/ErrorDetection"
+export { ErrorDetector } from "./error-detection/ErrorDetector"
 export { pitchToSitch, sitchToPitch } from "./BasicPitchCalculation"

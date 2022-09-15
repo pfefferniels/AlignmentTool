@@ -5,7 +5,7 @@ enum MatchStatus {
     AtemporalEvent = 1
 }
 
-enum ErrorIndex {
+export enum ErrorIndex {
     Correct = 0,
     PitchError = 1,
     NotewiseExtraNote = 2,

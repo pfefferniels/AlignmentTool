@@ -9,21 +9,9 @@ export enum ScoreNoteStatus {
 export type ScoreNote = {
 	pitch: number, 
 	sitch: string,
-	noteID: string,
+	meiId: string,
     noteStatus: ScoreNoteStatus,
-    hmm1Id: number,
-    hmm2Id: number,
-    hmm3Id: number
-}
-
-/**
- * used for sorting
- * @param a 
- * @param b 
- * @returns 
- */
-export function lessScoreNote(a: ScoreNote, b: ScoreNote) {
-    return a.pitch - b.pitch
+    hmm1Id: number
 }
 
 export enum PerformedNoteStatus {
@@ -38,17 +26,8 @@ export enum PerformedNoteStatus {
  */
 export type PerformedNote = {
     pitch: number 
-    noteId: number 
+    matchIndex: number 
     noteStatus: PerformedNoteStatus 
-    scoreNoteRef: number
+    scoreNoteRef?: number
 }
 
-/**
- * used for sorting `PerformedNote`s
- * @param a 
- * @param b 
- * @returns 
- */
-export function lessPerfNote(a: PerformedNote, b: PerformedNote) {
-    return a.pitch - b.pitch
-}

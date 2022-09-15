@@ -1,4 +1,4 @@
-import { Region, Regions } from '../src/realignment/Regions'
+import { Region, Regions } from '../src/error-detection/Regions'
 
 describe('Regions', function() {
     it('contains non overlapping regions', function() {

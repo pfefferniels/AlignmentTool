@@ -1,7 +1,6 @@
 import { HMM, HMMEvent } from "../src/HMM"
 import { PianoRoll } from "../src/PianoRoll"
 import { ScoreFollower } from "../src/score-follower/ScoreFollower"
-import { detectErrors } from "../src/error-detection/ErrorDetection"
 
 describe('HMMEvent', function() {
     it('constructs an HMMEvent', function() {
@@ -66,41 +65,6 @@ describe('ScoreFollower', function () {
 
         expect(result.events.map(event => event.meiId)).toEqual(['#note3', '#note1', '#note2', '#note5', '#note4'])
         expect(result.events.map(event => event.id)).toEqual(['001', '002', '003', '004', '005'])
-    })
-
-    it ('detects missing notes', function () {
-        const hmm = new HMM()
-        hmm.events = [
-            new HMMEvent(3, 4.5, [
-                [{ sitch: 'C5', meiID: '#m-46', voice: 1 },
-                 { sitch: 'D3', meiID: '#m-56', voice: 3 }]
-            ]),
-            new HMMEvent(3.5, 4, [
-                [{ sitch: 'G#3', meiID: '#m-60', voice: 3 }]
-            ]),
-            new HMMEvent(4, 4.5, [
-                [{ sitch: 'C4', meiID: '#m-62', voice: 2 },
-                 { sitch: 'F#4', meiID: '#m-64', voice: 3 }]
-            ])
-        ]
-
-        const follower = new ScoreFollower(hmm, 1)
-
-        const pr = new PianoRoll()
-        pr.events =
-            [
-                { ontime: 2.328, offtime: 3.261, id: '1', pitch: 50, sitch: 'D3', onvel: 80, offvel: 80, channel: 1 },
-                { ontime: 2.387, offtime: 3.561, id: '2', pitch: 72, sitch: 'C5', onvel: 80, offvel: 80, channel: 1 },
-                { ontime: 3.122, offtime: 3.556, id: '3', pitch: 56, sitch: 'G#3', onvel: 80, offvel: 80, channel: 1 },
-                { ontime: 3.779, offtime: 4.308, id: '4', pitch: 66, sitch: 'F#4', onvel: 80, offvel: 80, channel: 1 },
-            ]
-
-        const result = follower.getMatchResult(pr)
-
-        detectErrors(hmm, result)
-
-        expect(result.events.map(event => event.meiId)).toEqual(['#m-56', '#m-46', '#m-60', '#m-64'])
-        expect(result.missingNotes).toEqual([{ stime: 4, meiId: '#m-62'}])
     })
 })
 

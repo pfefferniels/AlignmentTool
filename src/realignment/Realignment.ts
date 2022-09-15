@@ -18,9 +18,3 @@ type PartAlignment = {
 	noteId: number
 }
 
-class MOHMM {
-	match: ScorePerformanceMatch
-	hmm: HMM
-	secPerTick: number
-
-}
