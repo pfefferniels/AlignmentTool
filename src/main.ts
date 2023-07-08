@@ -1,5 +1,4 @@
 import { HMM, HMMEvent } from "./HMM";
-import { StateType } from "./HMMState";
 import { PianoRoll } from "./PianoRoll";
 import { ScoreFollower } from "./score-follower/ScoreFollower";
 
@@ -14,7 +13,7 @@ hmm.events = [
     { sitch: 'B3', meiID: '#note5', voice: 3 }]
   ])]
 
-const follower = new ScoreFollower(hmm, 1)
+const follower = new ScoreFollower(hmm, 4)
 
 const pr = new PianoRoll()
 pr.events =
