@@ -18,7 +18,7 @@ describe('ErrorDetection', function() {
             ])
         ]
 
-        const follower = new ScoreFollower(hmm, 1)
+        const follower = new ScoreFollower(hmm, 4)
 
         const pr = new PianoRoll()
         pr.events =
@@ -50,7 +50,7 @@ describe('ErrorDetection', function() {
                 { sitch: 'B3', meiID: '#note5', voice: 3 }]
             ])]
 
-        const follower = new ScoreFollower(hmm, 1)
+        const follower = new ScoreFollower(hmm, 4)
 
         const pr = new PianoRoll()
         pr.events =
@@ -87,7 +87,7 @@ describe('ErrorDetection', function() {
                 { sitch: 'B3', meiID: '#note5', voice: 3 }]
             ])]
 
-        const follower = new ScoreFollower(hmm, 1)
+        const follower = new ScoreFollower(hmm, 4)
 
         const pr = new PianoRoll()
         pr.events =

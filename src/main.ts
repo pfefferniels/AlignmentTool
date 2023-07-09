@@ -1,4 +1,5 @@
-import { HMM, HMMEvent } from "./HMM";
+import { HMM } from "./hmm/HMM";
+import { HMMEvent } from "./hmm/HMMEvent";
 import { PianoRoll } from "./PianoRoll";
 import { ScoreFollower } from "./score-follower/ScoreFollower";
 
@@ -11,6 +12,10 @@ hmm.events = [
   new HMMEvent(3, 4, [
     [{ sitch: 'D5', meiID: '#note4', voice: 1 },
     { sitch: 'B3', meiID: '#note5', voice: 3 }]
+  ]),
+  new HMMEvent(4, 5, [
+    [{ sitch: 'E5', meiID: '#note6', voice: 1 },
+    { sitch: 'G#3', meiID: '#note7', voice: 3 }]
   ])]
 
 const follower = new ScoreFollower(hmm, 4)

@@ -1,4 +1,5 @@
-import { HMM, HMMEvent } from "../src/HMM"
+import { HMM } from "../src/hmm/HMM"
+import { HMMEvent } from "../src/hmm/HMMEvent"
 import { PianoRoll } from "../src/PianoRoll"
 import { ScoreFollower } from "../src/score-follower/ScoreFollower"
 
@@ -49,7 +50,7 @@ describe('ScoreFollower', function () {
                 { sitch: 'B3', meiID: '#note5', voice: 3 }]
             ])]
 
-        const follower = new ScoreFollower(hmm, 1)
+        const follower = new ScoreFollower(hmm, 4)
 
         const pr = new PianoRoll()
         pr.events =

@@ -1,4 +1,4 @@
-import { assignProbabilities, Prob } from "./BasicCalculation"
+import { assignProbabilities, Prob } from "../BasicCalculation"
 
 export enum StateType {
 	Chord,
@@ -24,7 +24,7 @@ export enum StateType {
 export class HMMState {
     refTime: number
     pitches: number[]
-    sitches: string[] // TODO: is this really necessary
+    sitches: string[] // TODO: is this really necessary?
     scoreIDs: string[]
     scoreTimes: number[]
     outProb: Prob<number>

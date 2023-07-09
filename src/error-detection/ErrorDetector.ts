@@ -1,17 +1,17 @@
 import { sitchToPitch } from ".."
-import { HMM } from "../HMM"
-import { StateType } from "../HMMState"
+import { HMM } from "../hmm/HMM"
+import { StateType } from "../hmm/HMMState"
 import { ErrorIndex, ScorePerformanceMatch } from "../Match"
 import { PerformedNote, PerformedNoteStatus, ScoreNote, ScoreNoteStatus } from "../Note"
 import { Region, Regions } from "./Regions";
 import { TempoTracker } from "../realignment/TempoTracker";
 
 export type ErrorRegions = {
-    all: Regions
-    pitchErrors: Regions 
-    extraNotes: Regions
-    reorderedNotes: Regions
-    missingNotes: Regions
+	all: Regions
+	pitchErrors: Regions
+	extraNotes: Regions
+	reorderedNotes: Regions
+	missingNotes: Regions
 }
 
 
@@ -133,8 +133,8 @@ export class ErrorDetector {
 		})
 
 		alignedClusters.slice(1).forEach((cluster, shadow) => {
-			let n = shadow + 1
-			let prevLP = LP
+			const n = shadow + 1
+			const prevLP = LP
 			for (let i = 0; i < this.hmm.events.length; i++) {
 				LP[i] = prevLP[i]
 				amax[n][i] = i
@@ -221,10 +221,11 @@ export class ErrorDetector {
 		const cluster = allClusters[index]
 		const prevCluster = allClusters[index - 1]
 		const nextCluster = allClusters[index + 1]
-	
+
 		if (cluster.hmmId > 0 && cluster.hmmId < this.hmm.events.length - 1) {
 			// this cluster is sourounded by by clusters with defined onset times
-			if (prevCluster.medianOnsetTime >= 0 && nextCluster.medianOnsetTime >= 0) {
+			if (prevCluster && nextCluster &&
+				prevCluster.medianOnsetTime >= 0 && nextCluster.medianOnsetTime >= 0) {
 				if (cluster.medianOnsetTime >= 0) {
 					refT = 1 / 3 * cluster.medianOnsetTime
 						+ 2 / 3 * (nextCluster.medianOnsetTime * (this.hmm.events[cluster.hmmId].scoreTime - this.hmm.events[cluster.hmmId - 1].scoreTime) + prevCluster.medianOnsetTime * (this.hmm.events[cluster.hmmId + 1].scoreTime - this.hmm.events[cluster.hmmId].scoreTime)) / Number(this.hmm.events[cluster.hmmId + 1].scoreTime - this.hmm.events[cluster.hmmId - 1].scoreTime)
@@ -237,9 +238,9 @@ export class ErrorDetector {
 		else if (cluster.medianOnsetTime >= 0) {
 			refT = cluster.medianOnsetTime
 		}
-	
+
 		if (refT === undefined) {
-			let refTimes: number[] = []
+			const refTimes: number[] = []
 			for (let i = cluster.matchIndex; i < nextMatchIndex; i++) {
 				refTimes.push(this.match.events[i].ontime)
 			}
@@ -255,19 +256,19 @@ export class ErrorDetector {
 		const alignedClusters = this.extractAlignedClusters()
 
 		this.markClusterwiseExtraNotes(alignedClusters)
-	
+
 		const duplicateMeiIds =
 			this.hmm.duplicateOnsets
 				.map(duplicateOnset => duplicateOnset.meiIDs.slice(1))
 				.flat()
-	
-	
+
+
 		alignedClusters.forEach((cluster, n) => {
 			const nextMatchIndex = (n === alignedClusters.length - 1) ?
 				this.match.events.length : alignedClusters[n + 1].matchIndex
-	
+
 			const refT = this.getReferenceTimeForCluster(alignedClusters, n)
-	
+
 			const scoreClusterContent: ScoreNote[] = this.hmm.events[cluster.hmmId].clusters
 				.flat(2)
 				.filter(note => !duplicateMeiIds.includes(note.meiID))
@@ -280,8 +281,8 @@ export class ErrorDetector {
 				}))
 				.sort((a, b) => a.pitch - b.pitch)
 			// console.log('score cluster content', scoreClusterContent)
-	
-			let performedNoteClusterContent: PerformedNote[] = []
+
+			const performedNoteClusterContent: PerformedNote[] = []
 			for (let i = cluster.matchIndex; i < nextMatchIndex; i++) {
 				performedNoteClusterContent.push({
 					pitch: sitchToPitch(this.match.events[i].sitch),
@@ -291,12 +292,12 @@ export class ErrorDetector {
 			}
 			performedNoteClusterContent.sort((a, b) => a.pitch - b.pitch)
 			// console.log('performedNoteClusterContent=', performedNoteClusterContent)
-	
+
 			// Select best synchronised performed note for each pitch -> others are extra notes
-	
+
 			// Identify correct notes
 			const matchEventOfPerformedCluster = (i: number) => this.match.events[performedNoteClusterContent[i].matchIndex]
-	
+
 			for (let m = 0; m < performedNoteClusterContent.length; m++) {
 				let count = 1;
 				let amin = m;
@@ -312,7 +313,7 @@ export class ErrorDetector {
 						min = Math.abs(matchEventOfPerformedCluster(mp).ontime - refT);
 					}
 				}
-	
+
 				performedNoteClusterContent[amin].noteStatus = PerformedNoteStatus.Unknown
 				for (let l = 0; l < scoreClusterContent.length; l++) {
 					if (performedNoteClusterContent[amin].pitch == scoreClusterContent[l].pitch) {
@@ -326,7 +327,7 @@ export class ErrorDetector {
 				}
 				m += count - 1
 			}
-	
+
 			for (let m = performedNoteClusterContent.length - 1; m >= 0; m--) {
 				if (performedNoteClusterContent[m].noteStatus === 1) {
 					// matchEventOfPerformedCluster(m).meiId = '*'
@@ -336,18 +337,18 @@ export class ErrorDetector {
 					performedNoteClusterContent.splice(m, 1)
 				}
 			}
-	
+
 			/// Identify pitch error or extra note
-			let scoreClusterSize = scoreClusterContent.length;
+			const scoreClusterSize = scoreClusterContent.length;
 			for (let l = -1; l < scoreClusterSize; l++) {
-	
+
 				let minPitch = -1;
 				let maxPitch = 500;
-	
+
 				if (l >= 0) {
 					minPitch = scoreClusterContent[l].pitch;
 				}
-				let SCIDs: number[] = [] // ID for notes in score cluster content
+				const SCIDs: number[] = [] // ID for notes in score cluster content
 				for (let lp = l + 1; lp < scoreClusterContent.length; lp++) {
 					l = lp - 1;
 					if (scoreClusterContent[lp].noteStatus == 1) {
@@ -359,15 +360,15 @@ export class ErrorDetector {
 						l = lp;
 					}
 				}
-	
-				let PCIDs: number[] = [] // ID for notes in perform cluster content
+
+				const PCIDs: number[] = [] // ID for notes in perform cluster content
 				for (let m = 0; m < performedNoteClusterContent.length; m++) {
 					if (performedNoteClusterContent[m].pitch > minPitch && performedNoteClusterContent[m].pitch < maxPitch) {
 						PCIDs.push(m);
 						performedNoteClusterContent[m].noteStatus = PerformedNoteStatus.Extra
 					}
 				}
-	
+
 				if (PCIDs.length === 0) continue
 				if (SCIDs.length === 0) {
 					for (let mm = 0; mm < PCIDs.length; mm++) {
@@ -375,7 +376,7 @@ export class ErrorDetector {
 					}
 					continue
 				}
-	
+
 				if (PCIDs.length == SCIDs.length) {
 					for (let mm = 0; mm < PCIDs.length; mm++) {
 						performedNoteClusterContent[PCIDs[mm]].noteStatus = PerformedNoteStatus.Substition
@@ -383,30 +384,30 @@ export class ErrorDetector {
 					}
 					continue
 				}
-	
+
 				// Reach here only if (PCIDs.length>1 or SCIDs.length>1)
 				// note-wise LR alignment for (minPitch,maxPitch)
-				let stateSize = PCIDs.length + 2; //state = 0(N/A) / PCID+1 / 9999(N/A)
+				const stateSize = PCIDs.length + 2; //state = 0(N/A) / PCID+1 / 9999(N/A)
 				const LP = new Array<number>(stateSize)
 				const amax = new Array(SCIDs.length)
 				for (let i = 0; i < SCIDs.length; i++) {
 					amax[i] = new Array<number>(stateSize).fill(0)
 				}
-	
+
 				// initial probability (uniform)
 				LP[0] = -100
 				for (let i = 1; i < stateSize - 1; i++) {
 					LP[i] = ErrorDetector.errLP(performedNoteClusterContent[PCIDs[i - 1]].pitch - scoreClusterContent[SCIDs[0]].pitch);
 				}
 				LP[stateSize - 1] = -100;
-	
+
 				let logP;
 				for (let t = 1; t < SCIDs.length; t++) {
 					const preLP: number[] = LP.slice() // copy
-	
+
 					LP[0] = preLP[0] - 100
 					amax[t][0] = 0
-	
+
 					for (let i = 1; i < stateSize - 1; i++) {
 						amax[t][i] = 0;
 						LP[i] = preLP[0];
@@ -419,7 +420,7 @@ export class ErrorDetector {
 						}
 						LP[i] += ErrorDetector.errLP(performedNoteClusterContent[PCIDs[i - 1]].pitch - scoreClusterContent[SCIDs[t]].pitch);
 					}
-	
+
 					amax[t][stateSize - 1] = stateSize - 1;
 					LP[stateSize - 1] = preLP[stateSize - 1];
 					for (let j = 1; j < stateSize - 1; j++) {
@@ -430,10 +431,10 @@ export class ErrorDetector {
 						}
 					}
 					LP[stateSize - 1] -= 100
-	
+
 				}
-	
-				let optPath = new Array<number>(SCIDs.length)
+
+				const optPath = new Array<number>(SCIDs.length)
 				optPath[SCIDs.length - 1] = 0
 				let max = LP[0]
 				for (let i = 1; i < stateSize; i++) {
@@ -445,18 +446,18 @@ export class ErrorDetector {
 				for (let t = SCIDs.length - 2; t >= 0; t -= 1) {
 					optPath[t] = amax[t + 1][optPath[t + 1]];
 				}
-	
+
 				for (let i = 0; i < SCIDs.length; i++) {
 					if (optPath[i] == 0 || optPath[i] == PCIDs.length + 1) { continue; }
 					performedNoteClusterContent[PCIDs[optPath[i] - 1]].noteStatus = PerformedNoteStatus.Substition
 					performedNoteClusterContent[PCIDs[optPath[i] - 1]].scoreNoteRef = SCIDs[i]
 				}
-	
+
 			}
-	
+
 			performedNoteClusterContent.forEach(note => {
 				const matchEvent = this.match.events[note.matchIndex]
-	
+
 				if (note.noteStatus === PerformedNoteStatus.Extra) {
 					// matchEvent.meiId = '*'
 					matchEvent.errorIndex = ErrorIndex.ClusterwiseExtraNote
@@ -483,25 +484,25 @@ export class ErrorDetector {
 				})
 			})
 		})
-	
+
 		const pitchErrorPositions = []
 		const extraNotePositions = []
 		const reorderedNotePositions = []
 		const scoreTimes: number[] = []
 		const onsetTimes: number[] = []
-	
+
 		let preScoreTime = -1
-	
+
 		// pick up performance errors
 		this.match.events.forEach((match, n) => {
 			if (match.errorIndex === ErrorIndex.PitchError) {
 				pitchErrorPositions.push(n)
 			}
-			else if (match.errorIndex === ErrorIndex.ClusterwiseExtraNote || 
-					 match.errorIndex === ErrorIndex.NotewiseExtraNote) {
-				extraNotePositions.push(n)            
+			else if (match.errorIndex === ErrorIndex.ClusterwiseExtraNote ||
+				match.errorIndex === ErrorIndex.NotewiseExtraNote) {
+				extraNotePositions.push(n)
 			}
-	
+
 			if (match.errorIndex === ErrorIndex.PitchError ||
 				match.errorIndex === ErrorIndex.Correct) {
 				scoreTimes.push(match.stime)
@@ -512,9 +513,9 @@ export class ErrorDetector {
 				preScoreTime = match.stime
 			}
 		})
-	
+
 		const errRegions = new Regions()
-	
+
 		// adds time windows around the onset and returns
 		// the corresponding regions
 		function onsetTimesToRegions(onsets: number[]) {
@@ -525,15 +526,15 @@ export class ErrorDetector {
 			})
 			return result
 		}
-	
+
 		const tempoTracker = new TempoTracker()
 		tempoTracker.setData(scoreTimes, onsetTimes)
-	
+
 		const pitchErrorRegions = onsetTimesToRegions(pitchErrorPositions.map(pos => this.match.events[pos].ontime))
 		const extraNoteRegions = onsetTimesToRegions(extraNotePositions.map(pos => this.match.events[pos].ontime))
 		const reorderedNoteRegions = onsetTimesToRegions(reorderedNotePositions.map(pos => this.match.events[pos].ontime))
 		const missingNoteRegions = onsetTimesToRegions(this.match.missingNotes.map(missingNote => tempoTracker.getTime(missingNote.stime)))
-	
+
 		return {
 			all: errRegions,
 			pitchErrors: pitchErrorRegions,

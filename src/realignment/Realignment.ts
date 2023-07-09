@@ -1,6 +1,6 @@
 import { assignProbabilities, Prob } from "../BasicCalculation";
-import { HMM } from "../HMM";
-import { HMMState } from "../HMMState";
+import { HMM } from "../hmm/HMM";
+import { HMMState } from "../hmm/HMMState";
 import { ScorePerformanceMatch } from "../Match";
 
 class PartHMM {
