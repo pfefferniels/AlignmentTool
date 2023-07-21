@@ -339,7 +339,7 @@ export class ScoreFollower {
 
 		this.currentState = this.getOptimalState()
 		if (this.currentState !== this.previousState) {
-			this.previousOnsetTime = this.currentState
+			this.previousOnsetTime = this.currentOnsetTime
 			this.currentOnsetTime = time
 		}
 		this.updateTickPerSec(time)
