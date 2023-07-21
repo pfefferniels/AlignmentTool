@@ -33,7 +33,7 @@ describe('ScoreFollower', function () {
         expect(follower.numberOfStates).toEqual(2)
         expect(follower.likelihood).toEqual([-0.10536051565782628, -2.3025850929940455])
         expect(follower.stime).toEqual([0, 3])
-        expect(follower.topId).toEqual([0, 1])
+        expect(follower.topIndex).toEqual([0, 1])
         expect(follower.internalId).toEqual([1, 1])
         expect(follower.topTransitionLP.length).toEqual(6)
     })
