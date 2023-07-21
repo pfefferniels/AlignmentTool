@@ -56,7 +56,12 @@ export class ScoreFollower {
 	 */
 	likelihood: number[] = []
 
-	maxPositionHistory: number[][] = []
+	/**
+	 * Keeps a history of the sequence of most probable
+	 * previous states at each time step, given the
+	 * sequence of observations up to that time.
+	 */
+	optimalPath: number[][] = []
 
 	/**
 	 * the observed pitches are saved here
@@ -417,14 +422,17 @@ export class ScoreFollower {
 	 * @param time 
 	 */
 	private updateLikelihood(observed: Observation) {
-		const prevLike = this.likelihood.slice()
+		const previousLikelihood = this.likelihood.slice()
 		const ioi = observed.ioi
-		const vi = new Array<number>(this.likelihood.length)
+
+		// Keeps track of the most likely previous state
+		// given that we are currently in state i.
+		const mostLikelyPrevStates = new Array<number>(this.likelihood.length)
 
 		for (const [i, event] of this.hmm.events.entries()) {
 			// self transition
 			let amax = i
-			let max = prevLike[i]
+			let max = previousLikelihood[i]
 
 			const probabilitySum = [TransitionType.Chord,
 			TransitionType.Arpeggio,
@@ -443,19 +451,19 @@ export class ScoreFollower {
 
 				// if the transition is internal
 				if (this.topId[i] === this.topId[j]) {
-					logProbability = prevLike[j] + this.internalTransitionLP[this.topId[i]][this.internalId[j]][this.internalId[i]] + Math.log(0.95 * ioiDistributionFunctions.get(TransitionType.ShortAppoggiatura)(ioi) + 0.05 * ioiInsertionDistribution(ioi));
+					logProbability = previousLikelihood[j] + this.internalTransitionLP[this.topId[i]][this.internalId[j]][this.internalId[i]] + Math.log(0.95 * ioiDistributionFunctions.get(TransitionType.ShortAppoggiatura)(ioi) + 0.05 * ioiInsertionDistribution(ioi));
 				}
 				// if the transition is immediate – if the note at j ends
 				// at the same time the note at i begins
 				else if (this.stime[this.topId[i]] === this.endStime[this.topId[j]]) {
-					logProbability = prevLike[j] + this.topTransitionLP[this.D1 + this.topId[i] - this.topId[j]] + this.internalTransitionLP[this.topId[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
+					logProbability = previousLikelihood[j] + this.topTransitionLP[this.D1 + this.topId[i] - this.topId[j]] + this.internalTransitionLP[this.topId[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
 						+ Math.log(0.95 * ioiDistributionFunctions.get(TransitionType.ShortAppoggiatura)(ioi) + 0.05 * ioiInsertionDistribution(ioi));
 				} else {
-					let mu = Math.max(
+					const mu = Math.max(
 						0,
 						(this.stime[this.topId[i]] - this.endStime[this.topId[j]]) / this.ticksPerSecond - this.stolenTime[j])
 
-					logProbability = prevLike[j] + this.topTransitionLP[this.D1 + this.topId[i] - this.topId[j]] + this.internalTransitionLP[this.topId[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
+					logProbability = previousLikelihood[j] + this.topTransitionLP[this.D1 + this.topId[i] - this.topId[j]] + this.internalTransitionLP[this.topId[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
 						+ Math.log((0.3 / Math.PI) / (Math.pow(ioi - mu, 2.) + Math.pow(0.3, 2))); // offline
 				}
 				if (logProbability > max) {
@@ -468,7 +476,7 @@ export class ScoreFollower {
 			for (let j = i + 1; j <= i + 18 && j < this.numberOfStates; j++) {
 				if (this.topId[j] - this.topId[i] > this.D1) continue
 
-				logProbability = prevLike[j] + this.topTransitionLP[this.D1 + this.topId[i] - this.topId[j]] + this.internalTransitionLP[this.topId[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
+				logProbability = previousLikelihood[j] + this.topTransitionLP[this.D1 + this.topId[i] - this.topId[j]] + this.internalTransitionLP[this.topId[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
 					+ ((ioi > 0.3) ? Math.log(2 * ioiInsertionDistribution(ioi)) : -10)
 				if (logProbability > max) {
 					max = logProbability
@@ -477,7 +485,7 @@ export class ScoreFollower {
 			}
 
 			// large skip
-			logProbability = prevLike[this.currentState] + this.transitionSkipLP + this.internalTransitionLP[this.topId[this.currentState]][this.internalId[this.currentState]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
+			logProbability = previousLikelihood[this.currentState] + this.transitionSkipLP + this.internalTransitionLP[this.topId[this.currentState]][this.internalId[this.currentState]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
 				+ ((ioi > 0.3) ? logIoiSkipDistribution(ioi) : -20);
 			if (logProbability > max) {
 				max = logProbability
@@ -486,10 +494,10 @@ export class ScoreFollower {
 
 			// update
 			this.likelihood[i] = max + event.pitchProbabilities[observed.pitch]
-			vi[i] = amax
+			mostLikelyPrevStates[i] = amax
 		}
 
-		this.maxPositionHistory.push(vi)
+		this.optimalPath.push(mostLikelyPrevStates)
 		this.inputPitch.push(observed.pitch)
 	}
 
@@ -500,12 +508,14 @@ export class ScoreFollower {
 	 * @param observed 
 	 */
 	updateInitialLikelihood(observed: Observation) {
-		const vi = new Array<number>(this.likelihood.length)
+		// Keeps track of the most likely previous state
+		// given that we are currently in state i.
+		const mostLikelyPrevStates = new Array<number>(this.likelihood.length)
 		this.hmm.events.forEach((event, i) => {
 			this.likelihood[i] += event.pitchProbabilities[observed.pitch]
-			vi[i] = i
+			mostLikelyPrevStates[i] = i
 		})
-		this.maxPositionHistory.push(vi)
+		this.optimalPath.push(mostLikelyPrevStates)
 		this.inputPitch.push(observed.pitch)
 	}
 
@@ -513,15 +523,7 @@ export class ScoreFollower {
 	 * @returns the first position of maximum likelihood
 	 */
 	getOptimalState() {
-		let max = this.likelihood[0]
-		let maxPosition = 0
-		for (let i = 1; i < this.likelihood.length; i++) {
-			if (this.likelihood[i] > max) {
-				maxPosition = i
-				max = this.likelihood[i]
-			}
-		}
-		return maxPosition
+		return this.likelihood.indexOf(Math.max(...this.likelihood))
 	}
 
 	/**
@@ -592,7 +594,7 @@ export class ScoreFollower {
 		const stateSeq = new Array<number>(pr.events.length) // stores HMM positions
 		stateSeq[stateSeq.length - 1] = this.getOptimalState()
 		for (let n = stateSeq.length - 2; n >= 0; n--) {
-			stateSeq[n] = this.maxPositionHistory[n + 1][stateSeq[n + 1]]
+			stateSeq[n] = this.optimalPath[n + 1][stateSeq[n + 1]]
 		}
 
 		for (let i = 0; i < pr.events.length; i++) {
