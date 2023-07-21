@@ -92,7 +92,7 @@ export class ScoreFollower {
 	stime: number[] = []
 	endStime: number[] = []
 
-	topId: number[] = []
+	topIndex: number[] = []
 	internalId: number[] = [] // determined by an event's internal position
 
 	/**
@@ -137,6 +137,17 @@ export class ScoreFollower {
 
 	pitchDiffProb: number[]
 
+	/**
+	 * Calculates the log-probabilities of transitions between different
+	 * states for a given index in the Hidden Markov Model.
+	 * 
+	 * @param {number[]} selfTrProbability - An array containing the
+	 * self-transition probabilities for each state.
+	 * @param {number} index - The index for which to calculate the log-probabilities.
+	 * 
+	 * @returns {number[][]} A matrix representing the log-probabilities of
+	 * transitions between different states.
+	 */
 	private calculateLPFor(selfTrProbability: number[], index: number) {
 		// 0=in, 1-100=states, 101=out
 		const LP: number[][] = new Array<Array<number>>(102)
@@ -183,7 +194,7 @@ export class ScoreFollower {
 			}
 			this.stime.push(event.scoreTime)
 			this.endStime.push(event.endScoreTime)
-			this.topId.push(curTopId)
+			this.topIndex.push(curTopId)
 			this.internalId.push(event.internalPosition)
 
 			const selfTransitionWeight = new Map<TransitionType, number>([
@@ -257,11 +268,11 @@ export class ScoreFollower {
 			}
 			selfTrProbability.push((d0 - 1 + 0.1) / (d0 + 0.1))
 
-			if (prevTopId !== this.topId[i]) {
+			if (prevTopId !== this.topIndex[i]) {
 				const lp = this.calculateLPFor(selfTrProbability, i - 1)
 				this.internalTransitionLP.push(lp)
 			}
-			prevTopId = this.topId[i]
+			prevTopId = this.topIndex[i]
 		}
 
 		// calculate logarithmic probability for the last state
@@ -434,36 +445,38 @@ export class ScoreFollower {
 			let amax = i
 			let max = previousLikelihood[i]
 
-			const probabilitySum = [TransitionType.Chord,
-			TransitionType.Arpeggio,
-			TransitionType.ShortAppoggiatura,
-			TransitionType.Trill].map(transitionType => (
-				this.ioiWeight[i].get(transitionType) * ioiDistributionFunctions.get(transitionType)(ioi)
-			)).reduce((prev, curr) => prev + curr, 0)
+			const probabilitySum = [
+				TransitionType.Chord,
+				TransitionType.Arpeggio,
+				TransitionType.ShortAppoggiatura,
+				TransitionType.Trill]
+				.map(transitionType => (
+					this.ioiWeight[i].get(transitionType) * ioiDistributionFunctions.get(transitionType)(ioi)
+				)).reduce((prev, curr) => prev + curr, 0)
 
-			max += Math.log(Math.exp(this.internalTransitionLP[this.topId[i]][event.internalPosition][event.internalPosition]) * probabilitySum +
-				Math.exp(this.topTransitionLP[this.D1] + this.internalTransitionLP[this.topId[i]][event.internalPosition][101] + this.internalTransitionLP[this.topId[i]][0][event.internalPosition]) * ioiInsertionDistribution(ioi))
+			max += Math.log(Math.exp(this.internalTransitionLP[this.topIndex[i]][event.internalPosition][event.internalPosition]) * probabilitySum +
+				Math.exp(this.topTransitionLP[this.D1] + this.internalTransitionLP[this.topIndex[i]][event.internalPosition][101] + this.internalTransitionLP[this.topIndex[i]][0][event.internalPosition]) * ioiInsertionDistribution(ioi))
 			let logProbability: number
 
 			// forward transition
 			for (let j = i - 1; j >= 0 && j >= i - 12; j--) {
-				if (this.topId[i] - this.topId[j] > this.D2) continue
+				if (this.topIndex[i] - this.topIndex[j] > this.D2) continue
 
 				// if the transition is internal
-				if (this.topId[i] === this.topId[j]) {
-					logProbability = previousLikelihood[j] + this.internalTransitionLP[this.topId[i]][this.internalId[j]][this.internalId[i]] + Math.log(0.95 * ioiDistributionFunctions.get(TransitionType.ShortAppoggiatura)(ioi) + 0.05 * ioiInsertionDistribution(ioi));
+				if (this.topIndex[i] === this.topIndex[j]) {
+					logProbability = previousLikelihood[j] + this.internalTransitionLP[this.topIndex[i]][this.internalId[j]][this.internalId[i]] + Math.log(0.95 * ioiDistributionFunctions.get(TransitionType.ShortAppoggiatura)(ioi) + 0.05 * ioiInsertionDistribution(ioi));
 				}
 				// if the transition is immediate – if the note at j ends
 				// at the same time the note at i begins
-				else if (this.stime[this.topId[i]] === this.endStime[this.topId[j]]) {
-					logProbability = previousLikelihood[j] + this.topTransitionLP[this.D1 + this.topId[i] - this.topId[j]] + this.internalTransitionLP[this.topId[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
+				else if (this.stime[this.topIndex[i]] === this.endStime[this.topIndex[j]]) {
+					logProbability = previousLikelihood[j] + this.topTransitionLP[this.D1 + this.topIndex[i] - this.topIndex[j]] + this.internalTransitionLP[this.topIndex[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topIndex[i]][0][this.internalId[i]]
 						+ Math.log(0.95 * ioiDistributionFunctions.get(TransitionType.ShortAppoggiatura)(ioi) + 0.05 * ioiInsertionDistribution(ioi));
 				} else {
 					const mu = Math.max(
 						0,
-						(this.stime[this.topId[i]] - this.endStime[this.topId[j]]) / this.ticksPerSecond - this.stolenTime[j])
+						(this.stime[this.topIndex[i]] - this.endStime[this.topIndex[j]]) / this.ticksPerSecond - this.stolenTime[j])
 
-					logProbability = previousLikelihood[j] + this.topTransitionLP[this.D1 + this.topId[i] - this.topId[j]] + this.internalTransitionLP[this.topId[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
+					logProbability = previousLikelihood[j] + this.topTransitionLP[this.D1 + this.topIndex[i] - this.topIndex[j]] + this.internalTransitionLP[this.topIndex[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topIndex[i]][0][this.internalId[i]]
 						+ Math.log((0.3 / Math.PI) / (Math.pow(ioi - mu, 2.) + Math.pow(0.3, 2))); // offline
 				}
 				if (logProbability > max) {
@@ -474,9 +487,9 @@ export class ScoreFollower {
 
 			// backward transition
 			for (let j = i + 1; j <= i + 18 && j < this.numberOfStates; j++) {
-				if (this.topId[j] - this.topId[i] > this.D1) continue
+				if (this.topIndex[j] - this.topIndex[i] > this.D1) continue
 
-				logProbability = previousLikelihood[j] + this.topTransitionLP[this.D1 + this.topId[i] - this.topId[j]] + this.internalTransitionLP[this.topId[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
+				logProbability = previousLikelihood[j] + this.topTransitionLP[this.D1 + this.topIndex[i] - this.topIndex[j]] + this.internalTransitionLP[this.topIndex[j]][this.internalId[j]][101] + this.internalTransitionLP[this.topIndex[i]][0][this.internalId[i]]
 					+ ((ioi > 0.3) ? Math.log(2 * ioiInsertionDistribution(ioi)) : -10)
 				if (logProbability > max) {
 					max = logProbability
@@ -485,7 +498,7 @@ export class ScoreFollower {
 			}
 
 			// large skip
-			logProbability = previousLikelihood[this.currentState] + this.transitionSkipLP + this.internalTransitionLP[this.topId[this.currentState]][this.internalId[this.currentState]][101] + this.internalTransitionLP[this.topId[i]][0][this.internalId[i]]
+			logProbability = previousLikelihood[this.currentState] + this.transitionSkipLP + this.internalTransitionLP[this.topIndex[this.currentState]][this.internalId[this.currentState]][101] + this.internalTransitionLP[this.topIndex[i]][0][this.internalId[i]]
 				+ ((ioi > 0.3) ? logIoiSkipDistribution(ioi) : -20);
 			if (logProbability > max) {
 				max = logProbability
