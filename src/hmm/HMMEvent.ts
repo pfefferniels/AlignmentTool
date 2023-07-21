@@ -64,7 +64,7 @@ export class HMMEvent {
 				// special treatment for the last cluster
 				if (clusterIndex === this.clusters.length - 1) {
 					const nClusters = this.clusters.length - 1;
-					const factor = 1 / (nClusters * iniSecPerTick * (this.endScoreTime - this.scoreTime / 0.15));
+					const factor = 1 / (nClusters * iniSecPerTick * (this.endScoreTime - this.scoreTime) / 0.15);
 					cluster.forEach(note => {
 						assignProbabilities(pitchProbabilities, sitchToPitch(note.sitch), note.voice < 0, factor);
 					});
