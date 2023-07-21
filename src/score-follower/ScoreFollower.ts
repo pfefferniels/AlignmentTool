@@ -601,15 +601,6 @@ export class ScoreFollower {
 			const meiId = this.getMeiId(stateSeq[i], pr.events[i].pitch)
 			match.events[i].stime = this.stime[stateSeq[i]]
 			match.events[i].meiId = meiId
-
-			/*
-			I assume this has no effect?
-
-			if (correctSitch == "") { continue; }
-			if (SitchToPitch(correctSitch) == SitchToPitch(match.evts[n].sitch)) {
-				match.evts[n].sitch = correctSitch;
-			}//endif
-			*/
 		}
 
 		return match
