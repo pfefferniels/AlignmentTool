@@ -569,12 +569,11 @@ export class ScoreFollower {
 		return meiId
 	}
 
-	getCorrectSitch(hmmPos: number, meiId: string): string {
+	getCorrectSitch(hmmPos: number, meiId: string) {
 		for (const cluster of this.hmm.events[hmmPos].clusters) {
 			const note = cluster.find(note => note.meiID === meiId)
 			if (note) return note.sitch
 		}
-		return ''
 	}
 
 	getMatchResult(pr: PianoRoll): ScorePerformanceMatch {
