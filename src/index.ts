@@ -1,7 +1,0 @@
-export { HMM } from "./hmm/HMM"
-export { HMMEvent } from "./hmm/HMMEvent"
-export { PianoRoll } from "./PianoRoll"
-export { ScoreFollower } from "./score-follower/ScoreFollower"
-export { ErrorDetector } from "./error-detection/ErrorDetector"
-export { pitchToSitch, sitchToPitch } from "./BasicPitchCalculation"
-export { realign } from "./realignment/Realigner"
