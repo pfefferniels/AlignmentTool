@@ -1,0 +1,278 @@
+<!doctype html>
+<html>
+<div>
+    <b>Successfully aligned notes:</b> <span id="count-success" />
+</div>
+<div>
+    <b>Missing notes:</b> <span id="count-missing" />
+</div>
+<div>
+    <b>Details:</b>
+    <div id="details" />
+</div>
+
+<script type='module'>
+    import Module from './Matcher.js'
+    const MatcherModule = await Module();
+
+    const midiNotes = [
+        { id: '000', onset: 0.000000, offset: 0.8520830, pitch: 73, channel: 0 },
+        { id: '001', onset: 0.006250, offset: 0.9822920, pitch: 64, channel: 0 },
+        { id: '002', onset: 0.006250, offset: 0.8083330, pitch: 57, channel: 0 },
+        { id: '003', onset: 0.754167, offset: 1.1031250, pitch: 74, channel: 0 },
+        { id: '004', onset: 0.760417, offset: 1.0562500, pitch: 59, channel: 0 },
+        { id: '005', onset: 0.997917, offset: 1.6135420, pitch: 73, channel: 0 },
+        { id: '006', onset: 1.005208, offset: 1.5020830, pitch: 64, channel: 0 },
+        { id: '007', onset: 1.005208, offset: 1.5718750, pitch: 57, channel: 0 },
+        { id: '008', onset: 1.518750, offset: 2.4500000, pitch: 76, channel: 0 },
+        { id: '009', onset: 1.525000, offset: 2.4354170, pitch: 64, channel: 0 },
+        { id: '010', onset: 1.525000, offset: 2.4281250, pitch: 60, channel: 0 },
+        { id: '011', onset: 1.812500, offset: 2.3125000, pitch: 77, channel: 0 },
+        { id: '012', onset: 2.450000, offset: 3.0562500, pitch: 76, channel: 0 },
+        { id: '013', onset: 2.457292, offset: 2.9583330, pitch: 64, channel: 0 },
+        { id: '014', onset: 2.457292, offset: 3.0625000, pitch: 61, channel: 0 },
+        { id: '015', onset: 2.975000, offset: 3.7718750, pitch: 71, channel: 0 },
+        { id: '016', onset: 2.980208, offset: 3.8489580, pitch: 64, channel: 0 },
+        { id: '017', onset: 2.980208, offset: 3.7145830, pitch: 56, channel: 0 },
+        { id: '018', onset: 3.647917, offset: 4.0114580, pitch: 73, channel: 0 },
+        { id: '019', onset: 3.653125, offset: 3.9427080, pitch: 57, channel: 0 },
+        { id: '020', onset: 3.868750, offset: 4.3468750, pitch: 64, channel: 0 },
+        { id: '021', onset: 3.868750, offset: 4.4406250, pitch: 56, channel: 0 },
+        { id: '022', onset: 4.362500, offset: 5.2395830, pitch: 74, channel: 0 },
+        { id: '023', onset: 4.368750, offset: 5.2541670, pitch: 64, channel: 0 },
+        { id: '024', onset: 4.368750, offset: 5.2510420, pitch: 59, channel: 0 },
+        { id: '025', onset: 5.266667, offset: 5.8697920, pitch: 74, channel: 0 },
+        { id: '026', onset: 5.273958, offset: 5.7906250, pitch: 64, channel: 0 },
+        { id: '027', onset: 5.273958, offset: 5.8760420, pitch: 59, channel: 0 },
+        { id: '028', onset: 5.807292, offset: 6.6687500, pitch: 69, channel: 0 },
+        { id: '029', onset: 5.813542, offset: 6.6770830, pitch: 64, channel: 0 },
+        { id: '030', onset: 5.813542, offset: 6.6729170, pitch: 54, channel: 0 },
+        { id: '031', onset: 6.689583, offset: 7.2697920, pitch: 69, channel: 0 },
+        { id: '032', onset: 6.696875, offset: 7.1906250, pitch: 64, channel: 0 },
+        { id: '033', onset: 6.696875, offset: 7.2770830, pitch: 54, channel: 0 },
+        { id: '034', onset: 7.206250, offset: 8.0947920, pitch: 71, channel: 0 },
+        { id: '035', onset: 7.212500, offset: 8.1281250, pitch: 64, channel: 0 },
+        { id: '036', onset: 7.212500, offset: 8.1395830, pitch: 56, channel: 0 },
+        { id: '037', onset: 8.141667, offset: 8.8125000, pitch: 71, channel: 0 },
+        { id: '038', onset: 8.150000, offset: 8.7291670, pitch: 64, channel: 0 },
+        { id: '039', onset: 8.150000, offset: 8.8197920, pitch: 56, channel: 0 },
+        { id: '040', onset: 8.748958, offset: 9.7375000, pitch: 73, channel: 0 },
+        { id: '041', onset: 8.755208, offset: 9.7229170, pitch: 64, channel: 0 },
+        { id: '042', onset: 8.755208, offset: 9.7458330, pitch: 57, channel: 0 },
+        { id: '043', onset: 9.737500, offset: 10.060417, pitch: 76, channel: 0 },
+        { id: '044', onset: 9.737500, offset: 10.509375, pitch: 71, channel: 0 },
+        { id: '045', onset: 9.745833, offset: 10.526042, pitch: 50, channel: 0 },
+        { id: '046', onset: 10.06041, offset: 10.508333, pitch: 74, channel: 0 },
+        { id: '047', onset: 10.39895, offset: 11.557292, pitch: 73, channel: 0 },
+        { id: '048', onset: 10.40416, offset: 11.563542, pitch: 69, channel: 0 },
+        { id: '049', onset: 10.40729, offset: 12.143750, pitch: 52, channel: 0 },
+        { id: '050', onset: 11.48645, offset: 12.190625, pitch: 71, channel: 0 },
+        { id: '051', onset: 11.49166, offset: 12.194792, pitch: 68, channel: 0 },
+        { id: '052', onset: 12.13750, offset: 12.925000, pitch: 73, channel: 0 },
+        { id: '053', onset: 12.14166, offset: 13.030208, pitch: 64, channel: 0 },
+        { id: '054', onset: 12.14166, offset: 12.833333, pitch: 57, channel: 0 },
+        { id: '055', onset: 12.82916, offset: 13.172917, pitch: 74, channel: 0 },
+        { id: '056', onset: 12.83333, offset: 13.061458, pitch: 59, channel: 0 },
+        { id: '057', onset: 13.05625, offset: 13.714583, pitch: 73, channel: 0 },
+        { id: '058', onset: 13.06145, offset: 13.580208, pitch: 64, channel: 0 },
+        { id: '059', onset: 13.06145, offset: 13.617708, pitch: 57, channel: 0 },
+        { id: '060', onset: 13.61250, offset: 14.544792, pitch: 76, channel: 0 },
+        { id: '061', onset: 13.61666, offset: 14.536458, pitch: 64, channel: 0 },
+        { id: '062', onset: 13.61666, offset: 14.568750, pitch: 61, channel: 0 },
+        { id: '063', onset: 14.56354, offset: 15.087500, pitch: 76, channel: 0 },
+        { id: '064', onset: 14.56875, offset: 15.058333, pitch: 64, channel: 0 },
+        { id: '065', onset: 14.56875, offset: 15.092708, pitch: 61, channel: 0 },
+        { id: '066', onset: 15.08854, offset: 15.843750, pitch: 71, channel: 0 },
+        { id: '067', onset: 15.09270, offset: 15.957292, pitch: 64, channel: 0 },
+        { id: '068', onset: 15.09270, offset: 15.759375, pitch: 56, channel: 0 },
+        { id: '069', onset: 15.75520, offset: 16.082292, pitch: 73, channel: 0 },
+        { id: '070', onset: 15.75937, offset: 15.987500, pitch: 57, channel: 0 },
+        { id: '071', onset: 15.98333, offset: 16.586458, pitch: 71, channel: 0 },
+        { id: '072', onset: 15.98750, offset: 16.464583, pitch: 64, channel: 0 },
+        { id: '073', onset: 15.98750, offset: 16.497917, pitch: 56, channel: 0 },
+        { id: '074', onset: 16.49375, offset: 17.355208, pitch: 74, channel: 0 },
+        { id: '075', onset: 16.49791, offset: 17.364583, pitch: 64, channel: 0 },
+        { id: '076', onset: 16.49791, offset: 17.393750, pitch: 59, channel: 0 },
+        { id: '077', onset: 17.38854, offset: 17.911458, pitch: 74, channel: 0 },
+        { id: '078', onset: 17.39375, offset: 17.881250, pitch: 64, channel: 0 },
+        { id: '079', onset: 17.39375, offset: 17.915625, pitch: 59, channel: 0 },
+        { id: '080', onset: 17.91145, offset: 18.908333, pitch: 69, channel: 0 },
+        { id: '081', onset: 17.91562, offset: 18.760417, pitch: 64, channel: 0 },
+        { id: '082', onset: 17.91562, offset: 18.788542, pitch: 54, channel: 0 },
+        { id: '083', onset: 18.78333, offset: 19.445833, pitch: 71, channel: 0 },
+        { id: '084', onset: 18.78854, offset: 19.292708, pitch: 64, channel: 0 },
+        { id: '085', onset: 18.78854, offset: 19.329167, pitch: 56, channel: 0 },
+        { id: '086', onset: 19.32395, offset: 20.275000, pitch: 73, channel: 0 },
+        { id: '087', onset: 19.32812, offset: 20.280208, pitch: 57, channel: 0 },
+        { id: '088', onset: 19.34375, offset: 20.262500, pitch: 64, channel: 0 },
+        { id: '089', onset: 20.27500, offset: 21.039583, pitch: 74, channel: 0 },
+        { id: '090', onset: 20.28020, offset: 21.044792, pitch: 71, channel: 0 },
+        { id: '091', onset: 20.28020, offset: 20.922917, pitch: 66, channel: 0 },
+        { id: '092', onset: 20.28020, offset: 20.912500, pitch: 50, channel: 0 },
+        { id: '093', onset: 20.90833, offset: 22.134375, pitch: 73, channel: 0 },
+        { id: '094', onset: 20.91250, offset: 22.139583, pitch: 69, channel: 0 },
+        { id: '095', onset: 20.91250, offset: 21.991667, pitch: 64, channel: 0 },
+        { id: '096', onset: 20.91354, offset: 21.980208, pitch: 52, channel: 0 },
+        { id: '097', onset: 21.97395, offset: 22.806250, pitch: 71, channel: 0 },
+        { id: '098', onset: 21.97395, offset: 22.689583, pitch: 40, channel: 0 },
+        { id: '099', onset: 21.97916, offset: 22.810417, pitch: 68, channel: 0 },
+        { id: '100', onset: 21.97916, offset: 22.702083, pitch: 62, channel: 0 },
+        { id: '101', onset: 22.68958, offset: 23.971875, pitch: 69, channel: 0 },
+        { id: '102', onset: 22.68958, offset: 23.971875, pitch: 45, channel: 0 },
+        { id: '103', onset: 22.69375, offset: 23.976042, pitch: 64, channel: 0 },
+        { id: '104', onset: 22.69375, offset: 23.976042, pitch: 61, channel: 0 },
+    ]
+    const midiNotesVector = new MatcherModule.MidiNoteVector();
+    for (const note of midiNotes) {
+        midiNotesVector.push_back(note);
+    }
+
+    const scoreNotes = [
+        { scoreTime: 0, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 3, sitches: ['C#5'], notetypes: ['N..'], ids: ['P1-1-1'] },
+        { scoreTime: 0, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-1-6'] },
+        { scoreTime: 0, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 3, sitches: ['A3'], notetypes: ['N..'], ids: ['P1-1-10'] },
+        { scoreTime: 3, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 1, sitches: ['D5'], notetypes: ['N..'], ids: ['P1-1-2'] },
+        { scoreTime: 3, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 1, sitches: ['B3'], notetypes: ['N..'], ids: ['P1-1-11'] },
+        { scoreTime: 4, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['C#5'], notetypes: ['N..'], ids: ['P1-1-3'] },
+        { scoreTime: 4, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 2, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-1-7'] },
+        { scoreTime: 4, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['A3'], notetypes: ['N..'], ids: ['P1-1-12'] },
+        { scoreTime: 6, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 4, sitches: ['E5'], notetypes: ['N..'], ids: ['P1-1-4'] },
+        { scoreTime: 6, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-1-8'] },
+        { scoreTime: 6, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 4, sitches: ['C#4'], notetypes: ['N..'], ids: ['P1-1-13'] },
+        { scoreTime: 10, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['E5'], notetypes: ['N..'], ids: ['P1-1-5'] },
+        { scoreTime: 10, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 2, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-1-9'] },
+        { scoreTime: 10, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['C#4'], notetypes: ['N..'], ids: ['P1-1-14'] },
+        { scoreTime: 12, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 3, sitches: ['B4'], notetypes: ['N..'], ids: ['P1-2-1'] },
+        { scoreTime: 12, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-2-6'] },
+        { scoreTime: 12, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 3, sitches: ['G#3'], notetypes: ['N..'], ids: ['P1-2-10'] },
+        { scoreTime: 15, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 1, sitches: ['C#5'], notetypes: ['N..'], ids: ['P1-2-2'] },
+        { scoreTime: 15, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 1, sitches: ['A3'], notetypes: ['N..'], ids: ['P1-2-11'] },
+        { scoreTime: 16, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['B4'], notetypes: ['N..'], ids: ['P1-2-3'] },
+        { scoreTime: 16, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 2, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-2-7'] },
+        { scoreTime: 16, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['G#3'], notetypes: ['N..'], ids: ['P1-2-12'] },
+        { scoreTime: 18, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 4, sitches: ['D5'], notetypes: ['N..'], ids: ['P1-2-4'] },
+        { scoreTime: 18, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-2-8'] },
+        { scoreTime: 18, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 4, sitches: ['B3'], notetypes: ['N..'], ids: ['P1-2-13'] },
+        { scoreTime: 22, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['D5'], notetypes: ['N..'], ids: ['P1-2-5'] },
+        { scoreTime: 22, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 2, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-2-9'] },
+        { scoreTime: 22, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['B3'], notetypes: ['N..'], ids: ['P1-2-14'] },
+        { scoreTime: 24, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 4, sitches: ['A4'], notetypes: ['N..'], ids: ['P1-3-1'] },
+        { scoreTime: 24, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-3-5'] },
+        { scoreTime: 24, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 4, sitches: ['F#3'], notetypes: ['N..'], ids: ['P1-3-9'] },
+        { scoreTime: 28, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['A4'], notetypes: ['N..'], ids: ['P1-3-2'] },
+        { scoreTime: 28, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 2, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-3-6'] },
+        { scoreTime: 28, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['F#3'], notetypes: ['N..'], ids: ['P1-3-10'] },
+        { scoreTime: 30, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 4, sitches: ['B4'], notetypes: ['N..'], ids: ['P1-3-3'] },
+        { scoreTime: 30, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-3-7'] },
+        { scoreTime: 30, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 4, sitches: ['G#3'], notetypes: ['N..'], ids: ['P1-3-11'] },
+        { scoreTime: 34, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['B4'], notetypes: ['N..'], ids: ['P1-3-4'] },
+        { scoreTime: 34, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 2, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-3-8'] },
+        { scoreTime: 34, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['G#3'], notetypes: ['N..'], ids: ['P1-3-12'] },
+        { scoreTime: 36, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 4, sitches: ['C#5'], notetypes: ['N..'], ids: ['P1-4-1'] },
+        { scoreTime: 36, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-4-9'] },
+        { scoreTime: 36, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 4, sitches: ['A3'], notetypes: ['N..'], ids: ['P1-4-10'] },
+        { scoreTime: 40, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 1, sitches: ['E5'], notetypes: ['N..'], ids: ['P1-4-2'] },
+        { scoreTime: 40, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['D3'], notetypes: ['N..'], ids: ['P1-4-11'] },
+        { scoreTime: 40, staff: 1, voice: 3, suborder: 0, type: 'chord', duration: 2, sitches: ['B4'], notetypes: ['N..'], ids: ['P1-4-6'] },
+        { scoreTime: 41, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 1, sitches: ['D5'], notetypes: ['N..'], ids: ['P1-4-3'] },
+        { scoreTime: 42, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 4, sitches: ['C#5'], notetypes: ['N..'], ids: ['P1-4-4'] },
+        { scoreTime: 42, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 6, sitches: ['E3'], notetypes: ['N..'], ids: ['P1-4-12'] },
+        { scoreTime: 42, staff: 1, voice: 3, suborder: 0, type: 'chord', duration: 4, sitches: ['A4'], notetypes: ['N..'], ids: ['P1-4-7'] },
+        { scoreTime: 46, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['B4'], notetypes: ['N..'], ids: ['P1-4-5'] },
+        { scoreTime: 46, staff: 1, voice: 3, suborder: 0, type: 'chord', duration: 2, sitches: ['G#4'], notetypes: ['N..'], ids: ['P1-4-8'] },
+        { scoreTime: 48, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 3, sitches: ['C#5'], notetypes: ['N..'], ids: ['P1-5-1'] },
+        { scoreTime: 48, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-5-6'] },
+        { scoreTime: 48, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 3, sitches: ['A3'], notetypes: ['N..'], ids: ['P1-5-10'] },
+        { scoreTime: 51, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 1, sitches: ['D5'], notetypes: ['N..'], ids: ['P1-5-2'] },
+        { scoreTime: 51, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 1, sitches: ['B3'], notetypes: ['N..'], ids: ['P1-5-11'] },
+        { scoreTime: 52, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['C#5'], notetypes: ['N..'], ids: ['P1-5-3'] },
+        { scoreTime: 52, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 2, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-5-7'] },
+        { scoreTime: 52, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['A3'], notetypes: ['N..'], ids: ['P1-5-12'] },
+        { scoreTime: 54, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 4, sitches: ['E5'], notetypes: ['N..'], ids: ['P1-5-4'] },
+        { scoreTime: 54, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-5-8'] },
+        { scoreTime: 54, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 4, sitches: ['C#4'], notetypes: ['N..'], ids: ['P1-5-13'] },
+        { scoreTime: 58, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['E5'], notetypes: ['N..'], ids: ['P1-5-5'] },
+        { scoreTime: 58, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 2, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-5-9'] },
+        { scoreTime: 58, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['C#4'], notetypes: ['N..'], ids: ['P1-5-14'] },
+        { scoreTime: 60, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 3, sitches: ['B4'], notetypes: ['N..'], ids: ['P1-6-1'] },
+        { scoreTime: 60, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-6-6'] },
+        { scoreTime: 60, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 3, sitches: ['G#3'], notetypes: ['N..'], ids: ['P1-6-10'] },
+        { scoreTime: 63, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 1, sitches: ['C#5'], notetypes: ['N..'], ids: ['P1-6-2'] },
+        { scoreTime: 63, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 1, sitches: ['A3'], notetypes: ['N..'], ids: ['P1-6-11'] },
+        { scoreTime: 64, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['B4'], notetypes: ['N..'], ids: ['P1-6-3'] },
+        { scoreTime: 64, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 2, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-6-7'] },
+        { scoreTime: 64, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['G#3'], notetypes: ['N..'], ids: ['P1-6-12'] },
+        { scoreTime: 66, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 4, sitches: ['D5'], notetypes: ['N..'], ids: ['P1-6-4'] },
+        { scoreTime: 66, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-6-8'] },
+        { scoreTime: 66, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 4, sitches: ['B3'], notetypes: ['N..'], ids: ['P1-6-13'] },
+        { scoreTime: 70, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['D5'], notetypes: ['N..'], ids: ['P1-6-5'] },
+        { scoreTime: 70, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 2, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-6-9'] },
+        { scoreTime: 70, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['B3'], notetypes: ['N..'], ids: ['P1-6-14'] },
+        { scoreTime: 72, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 4, sitches: ['A4'], notetypes: ['N..'], ids: ['P1-7-1'] },
+        { scoreTime: 72, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-7-7'] },
+        { scoreTime: 72, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 4, sitches: ['F#3'], notetypes: ['N..'], ids: ['P1-7-10'] },
+        { scoreTime: 76, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['B4'], notetypes: ['N..'], ids: ['P1-7-2'] },
+        { scoreTime: 76, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 2, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-7-8'] },
+        { scoreTime: 76, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['G#3'], notetypes: ['N..'], ids: ['P1-7-11'] },
+        { scoreTime: 78, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 4, sitches: ['C#5'], notetypes: ['N..'], ids: ['P1-7-3'] },
+        { scoreTime: 78, staff: 2, voice: 1, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-7-9'] },
+        { scoreTime: 78, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 4, sitches: ['A3'], notetypes: ['N..'], ids: ['P1-7-12'] },
+        { scoreTime: 82, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['B4', 'D5'], notetypes: ['N..', 'N..'], ids: ['P1-7-4', 'P1-7-5'] },
+        { scoreTime: 82, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['D3'], notetypes: ['N..'], ids: ['P1-7-13'] },
+        { scoreTime: 82, staff: 1, voice: 3, suborder: 0, type: 'chord', duration: 2, sitches: ['F#4'], notetypes: ['N..'], ids: ['P1-7-6'] },
+        { scoreTime: 84, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 4, sitches: ['A4', 'C#5'], notetypes: ['N..', 'N..'], ids: ['P1-8-1', 'P1-8-2'] },
+        { scoreTime: 84, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 4, sitches: ['E3'], notetypes: ['N..'], ids: ['P1-8-11'] },
+        { scoreTime: 84, staff: 1, voice: 3, suborder: 0, type: 'chord', duration: 4, sitches: ['E4'], notetypes: ['N..'], ids: ['P1-8-8'] },
+        { scoreTime: 88, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 2, sitches: ['G#4', 'B4'], notetypes: ['N..', 'N..'], ids: ['P1-8-3', 'P1-8-4'] },
+        { scoreTime: 88, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 2, sitches: ['E2'], notetypes: ['N..'], ids: ['P1-8-12'] },
+        { scoreTime: 88, staff: 1, voice: 3, suborder: 0, type: 'chord', duration: 2, sitches: ['D4'], notetypes: ['N..'], ids: ['P1-8-9'] },
+        { scoreTime: 90, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 4, sitches: ['E4', 'A4'], notetypes: ['N..', 'N..'], ids: ['P1-8-5', 'P1-8-6'] },
+        { scoreTime: 90, staff: 2, voice: 2, suborder: 0, type: 'chord', duration: 4, sitches: ['A2'], notetypes: ['N..'], ids: ['P1-8-13'] },
+        { scoreTime: 90, staff: 1, voice: 3, suborder: 0, type: 'chord', duration: 4, sitches: ['C#4'], notetypes: ['N..'], ids: ['P1-8-10'] },
+    ]
+
+    const scoreNotesVector = new MatcherModule.NoteEventVector();
+    for (const note of scoreNotes) {
+        const newSitches = new MatcherModule.StringVector();
+        const newNotetypes = new MatcherModule.StringVector();
+        const newIds = new MatcherModule.StringVector();
+
+        for (const sitch of note.sitches) {
+            newSitches.push_back(sitch);
+        }
+        console.log(note.notetypes);
+        for (const notetype of note.notetypes) {
+            newNotetypes.push_back(notetype);
+        }
+        for (const id of note.ids) {
+            newIds.push_back(id);
+        }
+
+        note.sitches = newSitches;
+        note.notetypes = newNotetypes;
+        note.ids = newIds;
+
+        scoreNotesVector.push_back(note);
+    }
+
+    const result = MatcherModule.align(
+        midiNotesVector,
+        scoreNotesVector,
+        0.1,
+        4
+    );
+
+    const matches = result.matches;
+    document.querySelector('#count-success').innerHTML = matches.size();
+    for (let i = 0; i < matches.size(); i++) {
+        const match = matches.get(i);
+
+        document.querySelector('#details').innerHTML += `
+            <div>${match.scoreId} &rarr; ${match.midiId}, Match Status: ${match.matchStatus}, Error Index: ${match.errorIndex}</div>`;
+    }
+
+    const missingNotes = result.missingNotes;
+    document.querySelector('#count-missing').innerHTML = missingNotes.size();
+</script>
+
+</html>
