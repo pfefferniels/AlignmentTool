@@ -24,6 +24,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "Hmm_v170225.hpp"
 #include "PianoRoll_v170503.hpp"
 #include "HandSeparationForPR_v170304.hpp"
+#include "Prob.hpp"
 
 using namespace std;
 

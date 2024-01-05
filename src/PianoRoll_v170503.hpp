@@ -11,7 +11,7 @@
 #include <cmath>
 #include <cassert>
 #include <algorithm>
-#include "BasicCalculation_v170122.hpp"
+#include "BasicCalculation.hpp"
 #include "BasicPitchCalculation_v170101.hpp"
 
 using namespace std;
