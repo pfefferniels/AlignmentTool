@@ -20,7 +20,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "BasicCalculation.hpp"
 #include "Hmm_v170225.hpp"
 #include "ScorePerfmMatch.hpp"
-#include "PianoRoll_v170503.hpp"
+#include "PianoRoll.hpp"
 
 using namespace std;
 

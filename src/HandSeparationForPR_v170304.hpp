@@ -21,7 +21,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include<algorithm>
 #include"stdio.h"
 #include"stdlib.h"
-#include"PianoRoll_v170503.hpp"
+#include"PianoRoll.hpp"
 #include"HandSeparationData_MergedOututHMM_v161230.hpp"
 
 using namespace std;

@@ -35,7 +35,6 @@ struct MidiNote
 struct NoteEvent
 {
 	int scoreTime;
-	// barnum does not play any role for the algorithms
 	int staff; // 1 (RH) or 2 (LH)
 	int voice; // starts at 0, counts across staff boundaries
 	// subvoice does not play any role either
@@ -102,10 +101,8 @@ Fmt3x convertNoteEventsToFmt3x(const std::vector<NoteEvent> &events, int ticksPe
 	{
 		Fmt3xEvt newEvent;
 		newEvent.stime = event.scoreTime;
-		newEvent.barnum = "1";
 		newEvent.staff = event.staff;
 		newEvent.voice = event.voice;
-		newEvent.subvoice = 0;
 		newEvent.subOrder = event.suborder;
 		newEvent.eventtype = event.type;
 		newEvent.dur = event.duration;
