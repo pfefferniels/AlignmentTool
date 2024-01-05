@@ -73,17 +73,17 @@ public:
 
 	std::vector<std::string> Split(const std::string &str, char delim)
 	{
-		istringstream iss(str);
-		string tmp;
-		vector<string> res;
-		while (getline(iss, tmp, delim))
+		std::istringstream iss(str);
+		std::string tmp;
+		std::vector<std::string> res;
+		while (std::getline(iss, tmp, delim))
 			res.push_back(tmp);
 		return res;
-	} // end Split
-
+	}
+	
 	std::vector<int> FindFmt3xScorePos(std::string Id_fmt1, int startPos = 0)
 	{
-		vector<int> out(3); // Found in evts[i].fmt1IDs[j] -> out[0]=i, out[1]=j, out[2,...]=corresponding pitches
+		std::vector<int> out(3); // Found in evts[i].fmt1IDs[j] -> out[0]=i, out[1]=j, out[2,...]=corresponding pitches
 		out[0] = -1;
 		out[1] = -1;
 		out[2] = -1;
@@ -141,7 +141,7 @@ public:
 		std::vector<std::vector<int>> clusters;
 
 		{
-			vector<int> vi;
+			std::vector<int> vi;
 			vi.push_back(0);
 			for (int n = 1; n < pr.evts.size(); n += 1)
 			{

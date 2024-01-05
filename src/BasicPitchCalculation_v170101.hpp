@@ -1,29 +1,21 @@
 #ifndef BASICPITCHCALCULATION_HPP
 #define BASICPITCHCALCULATION_HPP
 
-#include <iostream>
-#include <fstream>
 #include <string>
 #include <sstream>
-#include <vector>
-#include <stdio.h>
-#include <stdlib.h>
-#include <cmath>
-#include <cassert>
-#include <algorithm>
 
-using namespace std;
-
-// pithc to spelled pitch (sitch)
-inline string PitchToSitch(int p)
+/**
+ * Transforms MIDI pitch to spelled pitch (sitch)
+ */ 
+std::string PitchToSitch(int p)
 {
 	if (p < 0)
 	{
 		return "R";
 	} // old rest
 	int q = (p + 120) % 12;
-	string qstr;
-	stringstream ss;
+	std::string qstr;
+	std::stringstream ss;
 	switch (q)
 	{
 	case 0:
@@ -66,9 +58,12 @@ inline string PitchToSitch(int p)
 	ss.str("");
 	ss << qstr << (p / 12 - 1);
 	return ss.str();
-} // end PitchToSitch
+}
 
-inline int SitchToPitch(string sitch)
+/**
+ * Transforms spelled pitch to MIDI pitch.
+ */
+int SitchToPitch(std::string sitch)
 {
 	if (sitch == "R")
 	{
