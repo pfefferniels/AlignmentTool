@@ -566,33 +566,6 @@ public:
 	double UpdateTickPerSec(double time)
 	{
 		double ioi = time - previousOnsetTime_; // effective ioi (state-onset-time-interval)
-
-		////////////////////// moving average
-		/*
-			const unsigned int range=4;
-			if(currentState_>0 && currentState_==previousState_+1 && ioi>0.035
-				&& Type[currentState_]=="CH" && Type[currentState_-1]=="CH"){
-				double tempo=((Stime[currentState_]-Stime[currentState_-1])/ioi);
-				tempo_.push_back(tempo);
-				if(tempo_.size()>range){tempo_.erase(tempo_.begin());}
-				lastTickPerSec_=tempo_[tempo_.size()-1];
-				tickPerSec_=0.;
-				for(int i=0;i<tempo_.size();i+=1){tickPerSec_+=tempo_[i];}
-				tickPerSec_/=tempo_.size();
-			}//endif
-		*/
-		////////////////////// (simple) Kalman filter
-		/*
-			if(currentState_>0 && currentState_==previousState_+1 && ioi>0.035
-				&& Type[currentState_]=="CH" && Type[currentState_-1]=="CH"){
-				double secPerTick=1/tickPerSec_;
-				double nu=double(Stime[currentState_]-Stime[currentState_-1]);
-				double K=nu*M_/(nu*nu*M_+Sig_t);
-				secPerTick+=K*(ioi-secPerTick*nu);
-				tickPerSec_=1./secPerTick;
-				M_=(Sig_t*M_)/(nu*nu*M_+Sig_t)+nu*nu*Sig_v;
-			}//endif
-		*/
 		////////////////////// switching Kalman filter
 
 		if (currentState_ > 0 && currentState_ == previousState_ + 1 && ioi > 0.035 && Type[currentState_] == "CH" && Type[currentState_ - 1] == "CH")
@@ -908,7 +881,6 @@ public:
 		}	  // endfor n
 
 		return match;
-	} // end GetMatchResult
-
-}; // endclass ScoreFollower
+	}
+};
 
