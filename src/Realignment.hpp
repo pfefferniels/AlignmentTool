@@ -828,7 +828,7 @@ public:
 								match.evts[perfmIDs[perfmClusterContent[amin].noteID]].fmt1ID = scoreClusterContent[l].fmt1ID;
 								match.evts[perfmIDs[perfmClusterContent[amin].noteID]].stime = partHMMs[i_s].states[i].stimes[scoreClusterContent[l].hmmID3];
 								match.evts[perfmIDs[perfmClusterContent[amin].noteID]].sitch = scoreClusterContent[l].sitch;
-								match.evts[perfmIDs[perfmClusterContent[amin].noteID]].errorInd = 0;
+								match.evts[perfmIDs[perfmClusterContent[amin].noteID]].errorInd = Correct;
 								break;
 							} // endif
 						}	  // endfor l
@@ -842,7 +842,7 @@ public:
 					{ // extra note
 						match.evts[perfmIDs[perfmClusterContent[m].noteID]].fmt1ID = "*";
 						match.evts[perfmIDs[perfmClusterContent[m].noteID]].stime = -1;
-						match.evts[perfmIDs[perfmClusterContent[m].noteID]].errorInd = 3;
+						match.evts[perfmIDs[perfmClusterContent[m].noteID]].errorInd = ClusterWiseExtraNote;
 						perfmClusterContent.erase(perfmClusterContent.begin() + m);
 					}
 					else if (perfmClusterContent[m].noteStatus == 0)
@@ -1033,13 +1033,13 @@ public:
 					{ // extra note
 						match.evts[perfmIDs[perfmClusterContent[m].noteID]].fmt1ID = "*";
 						match.evts[perfmIDs[perfmClusterContent[m].noteID]].stime = -1;
-						match.evts[perfmIDs[perfmClusterContent[m].noteID]].errorInd = 3;
+						match.evts[perfmIDs[perfmClusterContent[m].noteID]].errorInd = ClusterWiseExtraNote;
 					}
 					else if (perfmClusterContent[m].noteStatus == 2)
 					{ // pitch error
 						match.evts[perfmIDs[perfmClusterContent[m].noteID]].fmt1ID = scoreClusterContent[perfmClusterContent[m].scoreNoteRef].fmt1ID;
 						match.evts[perfmIDs[perfmClusterContent[m].noteID]].stime = partHMMs[i_s].states[i].stimes[scoreClusterContent[perfmClusterContent[m].scoreNoteRef].hmmID3];
-						match.evts[perfmIDs[perfmClusterContent[m].noteID]].errorInd = 1;
+						match.evts[perfmIDs[perfmClusterContent[m].noteID]].errorInd = PitchError;
 					}
 					else
 					{ // never reach here
@@ -1419,7 +1419,7 @@ ScorePerfmMatch realign(const Fmt3x &fmt3x_, const Hmm &hmm_, const ScorePerfmMa
 					continue;
 				}
 
-				match.evts[m].errorInd = 0;
+				match.evts[m].errorInd = Correct;
 				match.evts[m].sitch = fmt3x.evts[fmt3xPos[0]].sitches[fmt3xPos[1]];
 				match.evts[m].stime = match.missingNotes[i].stime;
 				match.evts[m].fmt1ID = match.missingNotes[i].fmt1ID;
@@ -1681,7 +1681,7 @@ ScorePerfmMatch realign(const Fmt3x &fmt3x_, const Hmm &hmm_, const ScorePerfmMa
 					continue;
 				}
 
-				match.evts[m].errorInd = 0;
+				match.evts[m].errorInd = Correct;
 				match.evts[m].sitch = fmt3x.evts[fmt3xPos[0]].sitches[fmt3xPos[1]];
 				match.evts[m].stime = match.missingNotes[i].stime;
 				match.evts[m].fmt1ID = match.missingNotes[i].fmt1ID;

@@ -566,6 +566,7 @@ public:
 	double UpdateTickPerSec(double time)
 	{
 		double ioi = time - previousOnsetTime_; // effective ioi (state-onset-time-interval)
+
 		////////////////////// switching Kalman filter
 
 		if (currentState_ > 0 && currentState_ == previousState_ + 1 && ioi > 0.035 && Type[currentState_] == "CH" && Type[currentState_ - 1] == "CH")
@@ -833,7 +834,7 @@ public:
 		evt.offvel = pr.evts[0].offvel;
 		evt.channel = pr.evts[0].channel;
 		evt.matchStatus = 0;
-		evt.errorInd = 0;
+		evt.errorInd = Correct;
 		evt.skipInd = "0";
 		match.evts.push_back(evt);
 
@@ -851,7 +852,7 @@ public:
 			evt.offvel = pr.evts[n].offvel;
 			evt.channel = pr.evts[n].channel;
 			evt.matchStatus = 0;
-			evt.errorInd = 0;
+			evt.errorInd = Correct;
 			evt.skipInd = "-";
 			match.evts.push_back(evt);
 		} // endfor n

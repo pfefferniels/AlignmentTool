@@ -303,7 +303,7 @@ ScorePerfmMatch detectErrors(const Fmt3x &fmt3, const Hmm &hmm, const ScorePerfm
 			for (int i = hmmID_noteID[n][1]; i < nextClusterNoteID; i += 1)
 			{
 				match.evts[i].fmt1ID = "*";
-				match.evts[i].errorInd = 3;
+				match.evts[i].errorInd = ClusterWiseExtraNote;
 			} // endfor i
 			continue;
 		} // endif
@@ -323,7 +323,7 @@ ScorePerfmMatch detectErrors(const Fmt3x &fmt3, const Hmm &hmm, const ScorePerfm
 				if (find(refPitches.begin(), refPitches.end(), SitchToPitch(match.evts[m].sitch)) == refPitches.end())
 				{
 					match.evts[m].fmt1ID = "*";
-					match.evts[m].errorInd = 3;
+					match.evts[m].errorInd = ClusterWiseExtraNote;
 				} // endif
 			}	  // endfor m
 			continue;
@@ -471,7 +471,7 @@ ScorePerfmMatch detectErrors(const Fmt3x &fmt3, const Hmm &hmm, const ScorePerfm
 						scoreClusterContent[l].noteStatus = 1;
 						match.evts[perfmClusterContent[amin].noteID].fmt1ID = scoreClusterContent[l].fmt1ID;
 						match.evts[perfmClusterContent[amin].noteID].sitch = scoreClusterContent[l].sitch;
-						match.evts[perfmClusterContent[amin].noteID].errorInd = 0;
+						match.evts[perfmClusterContent[amin].noteID].errorInd = Correct;
 						break;
 					} // endif
 				}	  // endfor l
@@ -483,7 +483,7 @@ ScorePerfmMatch detectErrors(const Fmt3x &fmt3, const Hmm &hmm, const ScorePerfm
 			if (perfmClusterContent[m].noteStatus == 1)
 			{
 				match.evts[perfmClusterContent[m].noteID].fmt1ID = "*";
-				match.evts[perfmClusterContent[m].noteID].errorInd = 3;
+				match.evts[perfmClusterContent[m].noteID].errorInd = ClusterWiseExtraNote;
 				perfmClusterContent.erase(perfmClusterContent.begin() + m);
 			}
 			else if (perfmClusterContent[m].noteStatus == 0)
@@ -678,12 +678,12 @@ ScorePerfmMatch detectErrors(const Fmt3x &fmt3, const Hmm &hmm, const ScorePerfm
 			if (perfmClusterContent[m].noteStatus == 1)
 			{ // extra note
 				match.evts[perfmClusterContent[m].noteID].fmt1ID = "*";
-				match.evts[perfmClusterContent[m].noteID].errorInd = 3;
+				match.evts[perfmClusterContent[m].noteID].errorInd = ClusterWiseExtraNote;
 			}
 			else if (perfmClusterContent[m].noteStatus == 2)
 			{ // pitch error
 				match.evts[perfmClusterContent[m].noteID].fmt1ID = scoreClusterContent[perfmClusterContent[m].scoreNoteRef].fmt1ID;
-				match.evts[perfmClusterContent[m].noteID].errorInd = 1;
+				match.evts[perfmClusterContent[m].noteID].errorInd = PitchError;
 			}
 			else
 			{ // never reach here
