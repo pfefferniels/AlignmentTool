@@ -35,7 +35,6 @@ struct Fmt3xEvt
 	std::vector<std::string> sitches;	// sitch content
 	std::vector<std::string> notetypes;	// N or Tr etc.
 	std::vector<std::string> fmt1IDs;	// id in fmt1
-	std::vector<std::string> AFInfo;	// information on arpeggio and fermata. Used only internally (not written in fmt3x files).
 };
 
 struct LessFmt3xEvt
