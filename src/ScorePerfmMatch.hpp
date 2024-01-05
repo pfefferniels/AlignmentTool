@@ -7,35 +7,48 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-#include<iostream>
-#include<string>
-#include<sstream>
-#include<cmath>
-#include<vector>
-#include<algorithm>
-#include<fstream>
-#include<cassert>
-#include"Hmm_v170225.hpp"
+#ifndef SCOREPERFMMATCH_HPP
+#define SCOREPERFMMATCH_HPP
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <vector>
+#include <stdio.h>
+#include <stdlib.h>
+#include <cmath>
+#include <iomanip>
+#include <algorithm>
+
 using namespace std;
 
-int main(int argc, char** argv) {
+struct ScorePerfmMatchEvt
+{
+	string ID;
+	double ontime;
+	double offtime;
+	string sitch;
+	int onvel;
+	int offvel;
+	int channel;
+	int matchStatus; // 0(with corresponding score time)/1(without corresponding score time; atemporal event)/-1(note match if errorInd=2,3)
+	int stime;
+	string fmt1ID;
+	int errorInd;	// 0(correct)/1(pitch error)/2(note-wise extra note, &)/3(cluster-wise extra note, *)
+	string skipInd; // 0(beginning)/1(resumption point)/- or +(otherwise)
+};
 
-	vector<int> v(100);
-	vector<double> d(100);
-	vector<string> s(100);
-	stringstream ss;
+struct MissingNote
+{
+	int stime;
+	string fmt1ID;
+};
 
-	if(argc!=3){cout<<"Error in usage! : $./this in.xml out_hmm.txt"<<endl; return -1;}
+struct ScorePerfmMatch
+{
+	vector<ScorePerfmMatchEvt> evts;
+	vector<MissingNote> missingNotes;
+};
 
-	Fmt1x fmt1;
-	Fmt2 fmt2;
-	Hom hom;
-	Hmm hmm;
-	fmt1.ReadMusicXML(string(argv[1]));
-	fmt2.ConvertFromFmt1x(fmt1);
-	hom.ConvertFromFmt2(fmt2);
-	hmm.ConvertFromHom(hom);
-	hmm.WriteFile(string(argv[2]));
-
-	return 0;
-}//end main
+#endif // SCOREPERFMMATCH_HPP

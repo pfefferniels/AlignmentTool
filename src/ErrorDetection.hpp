@@ -19,14 +19,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "stdlib.h"
 #include "Fmt3x_v170225.hpp"
 #include "Hmm_v170225.hpp"
-#include "ScorePerfmMatch_v170503.hpp"
+#include "ScorePerfmMatch.hpp"
 using namespace std;
 
 #define printOn false
 
-class ScoreNote
+struct ScoreNote
 {
-public:
 	int pitch;
 	string sitch;
 	string fmt1ID;
@@ -38,23 +37,19 @@ public:
 	void Print()
 	{
 		cout << "pitch,sitch,fmt1ID,noteStatus,hmmID1,2,3 : " << pitch << "\t" << sitch << "\t" << fmt1ID << "\t" << noteStatus << "\t" << hmmID1 << "," << hmmID2 << "," << hmmID3 << endl;
-	} // end Print
+	}
+};
 
-}; // endclass ScoreNote
-
-class LessScoreNote
+struct LessScoreNote
 {
-public:
 	bool operator()(const ScoreNote &a, const ScoreNote &b)
 	{
 		return a.pitch < b.pitch;
-	} // end operator()
-};	  // endclass LessScoreNote
-// stable_sort(scoreNotes.begin(), scoreNotes.end(), LessScoreNote());
+	}
+};
 
-class PerfmNote
+struct PerfmNote
 {
-public:
 	int pitch;
 	int noteID;
 	int noteStatus; // 0(correct)/1(extra)/2(substitution)/-1(unknown)
@@ -63,19 +58,16 @@ public:
 	void Print()
 	{
 		cout << "pitch,noteID,noteStatus,scoreNoteRef : " << pitch << "\t" << noteID << "\t" << noteStatus << "\t" << scoreNoteRef << endl;
-	} // end Print
+	}
+};
 
-}; // endclass PerfmNote
-
-class LessPerfmNote
+struct LessPerfmNote
 {
-public:
 	bool operator()(const PerfmNote &a, const PerfmNote &b)
 	{
 		return a.pitch < b.pitch;
-	} // end operator()
-};	  // endclass LessPerfmNote
-// stable_sort(perfmNotes.begin(), perfmNotes.end(), LessPerfmNote());
+	}
+};
 
 double errLP(int pitchError)
 {
@@ -102,9 +94,8 @@ double errLP(int pitchError)
 	else
 	{
 		return -30;
-	} // endif
-
-} // end errLP
+	}
+}
 
 ScorePerfmMatch detectErrors(const Fmt3x &fmt3, const Hmm &hmm, const ScorePerfmMatch &match_)
 {
@@ -442,7 +433,7 @@ ScorePerfmMatch detectErrors(const Fmt3x &fmt3, const Hmm &hmm, const ScorePerfm
 			{
 				perfmClusterContent[m].Print();
 			} // endfor m
-			// ####################################################################################
+			  // ####################################################################################
 		}
 
 		/// Select best synchronised performed note for each pitch -> others are extra notes
@@ -514,7 +505,7 @@ ScorePerfmMatch detectErrors(const Fmt3x &fmt3, const Hmm &hmm, const ScorePerfm
 			{
 				perfmClusterContent[m].Print();
 			} // endfor m
-			// ####################################################################################
+			  // ####################################################################################
 		}
 
 		/// Identify pitch error or extra note
@@ -752,7 +743,7 @@ ScorePerfmMatch detectErrors(const Fmt3x &fmt3, const Hmm &hmm, const ScorePerfm
 				} // endif
 			}	  // endfor j
 		}		  // endfor i
-	}			  //
+	}
 
 	return match;
 }

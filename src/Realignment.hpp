@@ -10,8 +10,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #ifndef RealignmentMOHMM_HPP
 #define RealignmentMOHMM_HPP
 
-#define printOn false
-
 #include <fstream>
 #include <iostream>
 #include <cmath>
@@ -22,7 +20,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <cfloat>
 #include "stdio.h"
 #include "stdlib.h"
-#include "ScorePerfmMatch_v170503.hpp"
+#include "ScorePerfmMatch.hpp"
 #include "Hmm_v170225.hpp"
 #include "PianoRoll_v170503.hpp"
 #include "HandSeparationForPR_v170304.hpp"
@@ -387,9 +385,8 @@ public:
 			subPerfm.evts.push_back(match.evts[n]);
 			perfmIDs.push_back(n);
 		} // endfor n
-		// subPerfm.WriteFile("subPerfm_match.txt");
-	} // end GetPerformedNotes
-
+	}
+	
 	void Viterbi()
 	{
 		if (printOn)
@@ -1082,9 +1079,6 @@ public:
 		HandSep();
 		ConstructPartHMMs();
 		GetPerformedNotes();
-		//		pr.WriteFileSpr("subPR.txt");
-		//		prL.WriteFileSpr("subPRL.txt");
-		//		prR.WriteFileSpr("subPRR.txt");
 		Viterbi();
 		DetectErrors();
 	} // end Realign
