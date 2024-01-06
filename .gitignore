@@ -2,3 +2,4 @@
 lib/Matcher.d.ts
 lib/Matcher.js
 lib/Matcher.wasm
+node_modules

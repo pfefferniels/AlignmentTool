@@ -12,8 +12,7 @@
 </div>
 
 <script type='module'>
-    import Module from '../lib/Matcher.js'
-    const MatcherModule = await Module();
+    import { align } from '../lib/index.js'
 
     const midiNotes = [
         { id: '000', onset: 0.000000, offset: 0.8520830, pitch: 73, channel: 0 },
@@ -122,10 +121,6 @@
         { id: '103', onset: 22.69375, offset: 23.976042, pitch: 64, channel: 0 },
         { id: '104', onset: 22.69375, offset: 23.976042, pitch: 61, channel: 0 },
     ]
-    const midiNotesVector = new MatcherModule.MidiNoteVector();
-    for (const note of midiNotes) {
-        midiNotesVector.push_back(note);
-    }
 
     const scoreNotes = [
         { scoreTime: 0, staff: 1, voice: 0, suborder: 0, type: 'chord', duration: 3, sitches: ['C#5'], notetypes: ['N..'], ids: ['P1-1-1'] },
@@ -231,38 +226,13 @@
         { scoreTime: 90, staff: 1, voice: 3, suborder: 0, type: 'chord', duration: 4, sitches: ['C#4'], notetypes: ['N..'], ids: ['P1-8-10'] },
     ]
 
-    const scoreNotesVector = new MatcherModule.NoteEventVector();
-    for (const note of scoreNotes) {
-        const newSitches = new MatcherModule.StringVector();
-        const newNotetypes = new MatcherModule.StringVector();
-        const newIds = new MatcherModule.StringVector();
-
-        for (const sitch of note.sitches) {
-            newSitches.push_back(sitch);
-        }
-        console.log(note.notetypes);
-        for (const notetype of note.notetypes) {
-            newNotetypes.push_back(notetype);
-        }
-        for (const id of note.ids) {
-            newIds.push_back(id);
-        }
-
-        note.sitches = newSitches;
-        note.notetypes = newNotetypes;
-        note.ids = newIds;
-
-        scoreNotesVector.push_back(note);
-    }
-
-    const result = MatcherModule.align(
-        midiNotesVector,
-        scoreNotesVector,
+    const matches = await align(
+        midiNotes,
+        scoreNotes,
         0.1,
         4
     );
 
-    const matches = result.matches;
     document.querySelector('#count-success').innerHTML = matches.size();
     for (let i = 0; i < matches.size(); i++) {
         const match = matches.get(i);
@@ -270,9 +240,6 @@
         document.querySelector('#details').innerHTML += `
             <div>${match.scoreId} &rarr; ${match.midiId}, Match Status: ${match.matchStatus}, Error Index: ${match.errorIndex}</div>`;
     }
-
-    const missingNotes = result.missingNotes;
-    document.querySelector('#count-missing').innerHTML = missingNotes.size();
 </script>
 
 </html>

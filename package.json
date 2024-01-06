@@ -1,0 +1,32 @@
+{
+  "name": "alignmenttool",
+  "version": "1.0.0",
+  "description": "Emscripten version of Eita Nakamuras alignment algorithm",
+  "main": "lib/index.js",
+  "types": "lib/Matcher.d.ts",
+  "directories": {
+    "example": "example",
+    "lib": "lib"
+  },
+  "scripts": {
+    "build": "./compile.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pfefferniels/AlignmentTool.git"
+  },
+  "keywords": [
+    "alignment",
+    "midi",
+    "score"
+  ],
+  "author": "Niels Pfeffer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pfefferniels/AlignmentTool/issues"
+  },
+  "homepage": "https://github.com/pfefferniels/AlignmentTool#readme",
+  "devDependencies": {
+    "@types/emscripten": "^1.39.10"
+  }
+}
