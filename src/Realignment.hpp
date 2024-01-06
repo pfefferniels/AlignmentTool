@@ -21,9 +21,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "stdio.h"
 #include "stdlib.h"
 #include "ScorePerfmMatch.hpp"
-#include "Hmm_v170225.hpp"
+#include "Hmm.hpp"
 #include "PianoRoll.hpp"
-#include "HandSeparationForPR_v170304.hpp"
+#include "HandSeparationForPR.hpp"
 #include "Prob.hpp"
 
 using namespace std;

@@ -18,7 +18,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "stdlib.h"
 #include <algorithm>
 #include "BasicCalculation.hpp"
-#include "Hmm_v170225.hpp"
+#include "Hmm.hpp"
 #include "ScorePerfmMatch.hpp"
 #include "PianoRoll.hpp"
 

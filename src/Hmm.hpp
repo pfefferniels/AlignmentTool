@@ -9,8 +9,8 @@
 #include <stdio.h>
 #include <cmath>
 #include <cassert>
-#include "Fmt3x_v170225.hpp"
-#include "BasicPitchCalculation_v170101.hpp"
+#include "Fmt3x.hpp"
+#include "BasicPitchCalculation.hpp"
 
 using namespace std;
 

@@ -20,7 +20,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <cmath>
 #include <cassert>
 #include <algorithm>
-#include "BasicPitchCalculation_v170101.hpp"
+#include "BasicPitchCalculation.hpp"
 #include "PianoRoll.hpp"
 
 struct Fmt3xEvt
