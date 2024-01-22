@@ -143,6 +143,26 @@ MatchResult convertMatchResult(const ScorePerfmMatch &match)
 	return result;
 }
 
+MatchResult alignMidiToMidi(
+	const std::vector<MidiNote> &midiNotes1,
+	const std::vector<MidiNote> &midiNotes2,
+	double secondsPerQuarterNote)
+{
+	PianoRoll pr1 = convertMidiNotesToPianoRoll(midiNotes1);
+	Fmt3x fmt3x = Fmt3x();
+	fmt3x.ConvertFromPianoRoll(pr1, 0);
+	Hmm hmm;
+	hmm.ConvertFromFmt3x(fmt3x);
+	ScoreFollower follower(hmm, secondsPerQuarterNote);
+
+	PianoRoll pr2 = convertMidiNotesToPianoRoll(midiNotes2);
+	ScorePerfmMatch firstMatch = follower.GetMatchResult(pr2);
+	ScorePerfmMatch matchWithErrors = detectErrors(fmt3x, hmm, firstMatch);
+	ScorePerfmMatch realignedMatch = realign(fmt3x, hmm, matchWithErrors, 0.3);
+
+	return convertMatchResult(realignedMatch);
+}
+
 MatchResult align(
 	const std::vector<MidiNote> &midiNotes,
 	const std::vector<NoteEvent> &noteEvents,

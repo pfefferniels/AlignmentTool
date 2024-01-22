@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Emscripten version of Eita Nakamuras alignment algorithm",
   "main": "lib/index.js",
-  "types": "lib/Matcher.d.ts",
+  "types": "lib/index.d.ts",
   "directories": {
     "example": "example",
     "lib": "lib"
