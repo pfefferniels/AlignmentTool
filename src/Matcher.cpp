@@ -220,4 +220,5 @@ EMSCRIPTEN_BINDINGS(score_follower)
 	register_vector<Match>("MatchVector");
 
 	emscripten::function<MatchResult>("align", &align);
+	emscripten::function<MatchResult>("alignMidiToMidi", &alignMidiToMidi);
 }
