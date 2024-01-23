@@ -136,9 +136,8 @@ public:
 	 */
 	void ConvertFromPianoRoll(PianoRoll pr, double threshold = 0.035)
 	{
-		std::stringstream ss;
+		// save the indices of the events building a cluster
 		std::vector<std::vector<int>> clusters;
-
 		{
 			std::vector<int> vi;
 			vi.push_back(0);
@@ -148,11 +147,11 @@ public:
 				{
 					clusters.push_back(vi);
 					vi.clear();
-				} // endif
+				}
 				vi.push_back(n);
-			} // endfor n
+			}
 			clusters.push_back(vi);
-		} //
+		}
 
 		Clear();
 		TPQN = 1000; // 1 tick <-> 1 ms
@@ -168,29 +167,28 @@ public:
 
 			for (int i = 0; i < clusters.size(); i += 1)
 			{
-
 				fmt1IDsPerPitch.assign(128, vs);
 
 				double clusterOntime = 0;
 				for (int j = 0; j < clusters[i].size(); j += 1)
 				{
 					clusterOntime += pr.evts[clusters[i][j]].ontime;
-				} // endfor j
+				}
 				clusterOntime /= double(clusters[i].size());
 				evt.stime = int(1000 * clusterOntime);
 
 				evt.sitches.clear();
 				evt.notetypes.clear();
 				evt.fmt1IDs.clear();
-				for (int j = 0; j < clusters[i].size(); j += 1)
+				for (int j = 0; j < clusters[i].size(); j++)
 				{
-					evt.sitches.push_back(pr.evts[clusters[i][j]].sitch);
+					PianoRollEvt correspEvent = pr.evts[clusters[i][j]];
+					evt.sitches.push_back(correspEvent.sitch);
 					evt.notetypes.push_back("N..");
-					ss.str("");
-					ss << "P1-1-" << clusters[i][j];
-					evt.fmt1IDs.push_back(ss.str());
-					fmt1IDsPerPitch[SitchToPitch(pr.evts[clusters[i][j]].sitch)].push_back(ss.str());
-				} // endfor j
+					evt.fmt1IDs.push_back(correspEvent.ID);
+					fmt1IDsPerPitch[SitchToPitch(correspEvent.sitch)].push_back(correspEvent.ID);
+				}
+
 				evt.numNotes = evt.sitches.size();
 
 				evts.push_back(evt);
@@ -204,16 +202,15 @@ public:
 						dup.sitch = PitchToSitch(k);
 						dup.numOnsets = fmt1IDsPerPitch[k].size();
 						dup.fmt1IDs = fmt1IDsPerPitch[k];
-					} // endif
-				}	  // endfor k
+					}
+				}
+			}
 
-			} // endfor i
-
-			/// Set dur
+			// Set durations
 			for (int i = 1; i < evts.size(); i += 1)
 			{
 				evts[i - 1].dur = evts[i].stime - evts[i - 1].stime;
-			} // endfor i
+			}
 			evts[evts.size() - 1].dur = TPQN;
 		}
 	}
