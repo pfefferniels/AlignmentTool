@@ -22,7 +22,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "stdio.h"
 #include "stdlib.h"
 #include "PianoRoll.hpp"
-#include "HandSeparationData_MergedOututHMM.hpp"
+#include "HandSeparationData.hpp"
 
 using namespace std;
 
@@ -39,37 +39,38 @@ public:
 	HandSeparationEngine()
 	{
 		Init();
-	} // end HandSeparationEngine
+	}
+	
 	~HandSeparationEngine()
 	{
-	} // end ~HandSeparationEngine
-
+	}
+	
 	void Init()
 	{
-		HandSeparationData_MergedOutputHMM data;
-		Lprob = data.Lprob;
-		uniLprob = data.uniLprob;
-		LRLprob = data.LRLprob;
+		Lprob = handSaparationLProb;
+		uniLprob = handSeparationUniLProb;
+		LRLprob = handSeparationLRLProb;
 		iniPitchLH = 53;
 		iniPitchRH = 71;
-	} // end Init
-
+	}
+	
 	void SetInitialPitches(int pitchLH, int pitchRH)
 	{
 		iniPitchLH = pitchLH;
 		iniPitchRH = pitchRH;
-	} // end SetInitialPitches
-
+	}
+	
 	void SetPR(PianoRoll pr_)
 	{
 		pr = pr_;
-	} // end SetPR
+	}
 
+	/**
+	 * Sets the `channel` property of each event in the 
+	 * given PianoRoll to either 0 (right hand) or 1 (left hand).
+	 */
 	void SeparateHands()
-	{ // chan= 0:Right Hand, 1:Left Hand
-
-		vector<int> v(10);
-
+	{
 		int length = pr.evts.size();
 
 		// Assume a tenth (15 semitones) to be the maximum hand stretch
@@ -111,6 +112,7 @@ public:
 			if (p_cur < p_max - maximumStretch) handPartPreference[n][1] = 1;
 		}
 
+		vector<int> v(10);
 		int Nh = 50;
 		vector<double> LP; // k=2*h+sig
 		LP.assign(2 * Nh, -1000);
@@ -199,7 +201,6 @@ public:
 			pr.evts[n].channel = estStates[n] % 2;
 		}
 	}
-
-}; // endclass HandSeparationEngine
+};
 
 #endif // HandSeparationForPR_HPP
