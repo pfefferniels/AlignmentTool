@@ -6,15 +6,11 @@
 #include <cassert>
 #include <random>
 #include <climits>
-
-std::mt19937_64 mt_(0);
-std::uniform_real_distribution<> rand1_(0, 1);
-std::uniform_int_distribution<> rand1int_(0, INT_MAX);
+#include <numeric>
 
 inline double LogAdd(double d1, double d2)
 {
-	if (d1 > d2)
-		return d1 + log(1 + exp(d2 - d1));
+	if (d1 > d2) return d1 + log(1 + exp(d2 - d1));
 
 	return d2 + log(1 + exp(d1 - d2));
 }
@@ -25,16 +21,11 @@ inline void Norm(std::vector<double> &vd)
 	for (int i = 0; i < vd.size(); i += 1)
 	{
 		sum += vd[i];
-	} // endif
+	}
 	for (int i = 0; i < vd.size(); i += 1)
 	{
 		vd[i] /= sum;
 	}
-}
-
-inline void Normalize(std::vector<double> &vd)
-{
-	Norm(vd);
 }
 
 inline void Lognorm(std::vector<double> &vd)
@@ -68,15 +59,9 @@ inline void Lognorm(std::vector<double> &vd)
 	}
 }
 
-inline double Average(const std::vector<double> &vd)
+inline double Average(const std::vector<double> &vec)
 {
-	assert(vd.size() > 0);
-	double sum = 0;
-	for (int i = 0; i < vd.size(); i += 1)
-	{
-		sum += vd[i];
-	}
-	return sum / double(vd.size());
+	return std::accumulate(vec.begin(), vec.end(), 0.0) / vec.size();
 }
 
 #endif // BasicCalculation_HPP
