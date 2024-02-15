@@ -23,6 +23,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "BasicPitchCalculation.hpp"
 #include "PianoRoll.hpp"
 
+std::vector<std::string> Split(const std::string &str, char delim)
+{
+	std::istringstream iss(str);
+	std::string tmp;
+	std::vector<std::string> res;
+	while (std::getline(iss, tmp, delim))
+		res.push_back(tmp);
+	return res;
+}
+
 struct Fmt3xEvt
 {
 	int stime;
@@ -31,9 +41,9 @@ struct Fmt3xEvt
 	int subOrder;
 	std::string eventtype;
 	int dur;
-	int numNotes;			  //=sitches.size()
+	int numNotes;						//=sitches.size()
 	std::vector<std::string> sitches;	// sitch content
-	std::vector<std::string> notetypes;	// N or Tr etc.
+	std::vector<std::string> notetypes; // N or Tr etc.
 	std::vector<std::string> fmt1IDs;	// id in fmt1
 };
 
@@ -41,8 +51,10 @@ struct LessFmt3xEvt
 {
 	bool operator()(const Fmt3xEvt &a, const Fmt3xEvt &b)
 	{
-		if (a.stime < b.stime) return true;
-		if (a.stime == b.stime) return a.voice < b.voice;
+		if (a.stime < b.stime)
+			return true;
+		if (a.stime == b.stime)
+			return a.voice < b.voice;
 		return false;
 	}
 };
@@ -70,16 +82,6 @@ public:
 		duplicateOnsets.clear();
 	}
 
-	std::vector<std::string> Split(const std::string &str, char delim)
-	{
-		std::istringstream iss(str);
-		std::string tmp;
-		std::vector<std::string> res;
-		while (std::getline(iss, tmp, delim))
-			res.push_back(tmp);
-		return res;
-	}
-	
 	std::vector<int> FindFmt3xScorePos(std::string Id_fmt1, int startPos = 0)
 	{
 		std::vector<int> out(3); // Found in evts[i].fmt1IDs[j] -> out[0]=i, out[1]=j, out[2,...]=corresponding pitches
@@ -131,7 +133,7 @@ public:
 
 	/**
 	 * Converts a piano roll into a score object (for MIDI-to-MIDI alignment).
-	 * 
+	 *
 	 * @param threshold Threshold for chord clustering in s. 35 ms by default (0.035)
 	 */
 	void ConvertFromPianoRoll(PianoRoll pr, double threshold = 0.035)
