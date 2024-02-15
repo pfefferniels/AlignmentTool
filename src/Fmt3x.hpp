@@ -48,18 +48,6 @@ struct Fmt3xEvt
 	std::vector<std::string> fmt1IDs;	// id in fmt1
 };
 
-struct LessFmt3xEvt
-{
-	bool operator()(const Fmt3xEvt &a, const Fmt3xEvt &b)
-	{
-		if (a.stime < b.stime)
-			return true;
-		if (a.stime == b.stime)
-			return a.voice < b.voice;
-		return false;
-	}
-};
-
 struct DuplicateOnsetEvtInFmt3x
 {
 	int stime;
