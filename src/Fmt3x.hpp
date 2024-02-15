@@ -15,6 +15,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <string>
 #include <sstream>
 #include <vector>
+#include <tuple>
 #include <stdio.h>
 #include <stdlib.h>
 #include <cmath>
@@ -82,54 +83,28 @@ public:
 		duplicateOnsets.clear();
 	}
 
-	std::vector<int> FindFmt3xScorePos(std::string Id_fmt1, int startPos = 0)
+	/**
+	 * Finds the position of a given ID in the score as 
+	 * a tuplet (i, j) meaning that the ID was found in
+	 * evts[i].fmt1IDs[j].
+	 */
+	std::tuple<int, int> FindFmt3xScorePos(std::string searchedID, int startPos = 0)
 	{
-		std::vector<int> out(3); // Found in evts[i].fmt1IDs[j] -> out[0]=i, out[1]=j, out[2,...]=corresponding pitches
-		out[0] = -1;
-		out[1] = -1;
-		out[2] = -1;
-		for (int i = startPos; i < evts.size(); i += 1)
+		for (int i = startPos; i < evts.size(); i++)
 		{
-			for (int j = 0; j < evts[i].fmt1IDs.size(); j += 1)
+			for (int j = 0; j < evts[i].fmt1IDs.size(); j++)
 			{
-				if (evts[i].fmt1IDs[j].find(",") == std::string::npos)
+				std::vector<std::string> tmp = Split(evts[i].fmt1IDs[j], ',');
+				for (int k = 0; k < tmp.size(); k++)
 				{
-					if (Id_fmt1 == evts[i].fmt1IDs[j])
-					{
-						out[0] = i;
-						out[1] = j;
-						break;
-					}
+					if (searchedID == tmp[k])
+						return std::make_tuple(i, j);
 				}
-				else
-				{
-					std::vector<std::string> tmp = Split(evts[i].fmt1IDs[j], ',');
-					for (int k = 0; k < tmp.size(); k += 1)
-					{
-						if (Id_fmt1 == tmp[k])
-						{
-							out[0] = i;
-							out[1] = j;
-							break;
-						} // endif
-					}	  // endfor k
-				}		  // endif
-			}			  // endfor j
-			if (out[0] >= 0)
-			{
-				break;
 			}
-		} // endfor i
-		if (out[0] >= 0)
-		{
-			std::vector<std::string> tmp = Split(evts[out[0]].sitches[out[1]], ',');
-			for (int k = 0; k < tmp.size(); k += 1)
-			{
-				out.push_back(SitchToPitch(tmp[k]));
-			} // endfor k
-		}	  // endif
-		return out;
-	} // end FindFmt3xScorePos
+		}
+
+		return std::make_tuple(-1, -1);
+	}
 
 	/**
 	 * Converts a piano roll into a score object (for MIDI-to-MIDI alignment).

@@ -18,6 +18,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <vector>
 #include <algorithm>
 #include <cfloat>
+#include <tuple>
 #include "stdio.h"
 #include "stdlib.h"
 #include "ScorePerfmMatch.hpp"
@@ -1394,8 +1395,8 @@ ScorePerfmMatch realign(const Fmt3x &fmt3x_, const Hmm &hmm_, const ScorePerfmMa
 				continue;
 			} // endif
 
-			vector<int> fmt3xPos = fmt3x.FindFmt3xScorePos(match.missingNotes[i].fmt1ID);
-			assert(fmt3xPos[0] >= 0);
+			std::tuple<int, int> fmt3xPos = fmt3x.FindFmt3xScorePos(match.missingNotes[i].fmt1ID);
+			assert(std::get<0>(fmt3xPos) >= 0);
 
 			double mintime = refT - 0.3;
 			double maxtime = refT + 0.3;
@@ -1414,13 +1415,13 @@ ScorePerfmMatch realign(const Fmt3x &fmt3x_, const Hmm &hmm_, const ScorePerfmMa
 				{
 					continue;
 				}
-				if (SitchToPitch(match.evts[m].sitch) != SitchToPitch(fmt3x.evts[fmt3xPos[0]].sitches[fmt3xPos[1]]))
+				if (SitchToPitch(match.evts[m].sitch) != SitchToPitch(fmt3x.evts[std::get<0>(fmt3xPos)].sitches[std::get<1>(fmt3xPos)]))
 				{
 					continue;
 				}
 
 				match.evts[m].errorInd = Correct;
-				match.evts[m].sitch = fmt3x.evts[fmt3xPos[0]].sitches[fmt3xPos[1]];
+				match.evts[m].sitch = fmt3x.evts[std::get<0>(fmt3xPos)].sitches[std::get<1>(fmt3xPos)];
 				match.evts[m].stime = match.missingNotes[i].stime;
 				match.evts[m].fmt1ID = match.missingNotes[i].fmt1ID;
 				foundMissingNoteIDs.push_back(i);
@@ -1455,7 +1456,7 @@ ScorePerfmMatch realign(const Fmt3x &fmt3x_, const Hmm &hmm_, const ScorePerfmMa
 	vector<int> pitchErrPos;
 	vector<int> extraNotePos;
 	vector<int> reorderdNotePos;
-	vector<vector<int>> missNoteIDs;
+	std::vector<std::tuple<int,int>> missNoteIDs;
 
 	int preStime = -1;
 	vector<int> stimes;
@@ -1521,9 +1522,9 @@ ScorePerfmMatch realign(const Fmt3x &fmt3x_, const Hmm &hmm_, const ScorePerfmMa
 		errRegions.Add(match.evts[reorderdNotePos[k]].ontime - widthSec, match.evts[reorderdNotePos[k]].ontime + widthSec);
 	} // endfor k
 
-	for (int k = 0; k < missNoteIDs.size(); k += 1)
+	for (int k = 0; k < missNoteIDs.size(); k++)
 	{
-		double evtTime = tempoTracker.GetTime(fmt3x.evts[missNoteIDs[k][0]].stime);
+		double evtTime = tempoTracker.GetTime(fmt3x.evts[std::get<0>(missNoteIDs[k])].stime);
 		missNoteRegions.Add(evtTime - widthSec, evtTime + widthSec);
 		errRegions.Add(evtTime - widthSec, evtTime + widthSec);
 	} // endfor k
@@ -1656,8 +1657,8 @@ ScorePerfmMatch realign(const Fmt3x &fmt3x_, const Hmm &hmm_, const ScorePerfmMa
 				continue;
 			} // endif
 
-			vector<int> fmt3xPos = fmt3x.FindFmt3xScorePos(match.missingNotes[i].fmt1ID);
-			assert(fmt3xPos[0] >= 0);
+			std::tuple<int, int> fmt3xPos = fmt3x.FindFmt3xScorePos(match.missingNotes[i].fmt1ID);
+			assert(std::get<0>(fmt3xPos) >= 0);
 
 			double mintime = refT - 0.3;
 			double maxtime = refT + 0.3;
@@ -1676,13 +1677,13 @@ ScorePerfmMatch realign(const Fmt3x &fmt3x_, const Hmm &hmm_, const ScorePerfmMa
 				{
 					continue;
 				}
-				if (SitchToPitch(match.evts[m].sitch) != SitchToPitch(fmt3x.evts[fmt3xPos[0]].sitches[fmt3xPos[1]]))
+				if (SitchToPitch(match.evts[m].sitch) != SitchToPitch(fmt3x.evts[std::get<0>(fmt3xPos)].sitches[std::get<1>(fmt3xPos)]))
 				{
 					continue;
 				}
 
 				match.evts[m].errorInd = Correct;
-				match.evts[m].sitch = fmt3x.evts[fmt3xPos[0]].sitches[fmt3xPos[1]];
+				match.evts[m].sitch = fmt3x.evts[std::get<0>(fmt3xPos)].sitches[std::get<1>(fmt3xPos)];
 				match.evts[m].stime = match.missingNotes[i].stime;
 				match.evts[m].fmt1ID = match.missingNotes[i].fmt1ID;
 				foundMissingNoteIDs.push_back(i);
