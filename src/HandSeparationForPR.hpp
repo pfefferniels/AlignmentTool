@@ -31,9 +31,9 @@ class HandSeparationEngine
 public:
 	PianoRoll pr;
 
-	vector<vector<double>> Lprob;
-	vector<vector<double>> uniLprob;
-	vector<double> LRLprob;
+	std::array<std::array<double, 256>, 2> Lprob;
+	std::array<std::array<double, 128>, 2> uniLprob;
+	std::array<double, 2> LRLprob;
 	int iniPitchLH, iniPitchRH;
 
 	HandSeparationEngine()
