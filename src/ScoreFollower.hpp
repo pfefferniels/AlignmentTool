@@ -22,6 +22,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "ScorePerfmMatch.hpp"
 #include "PianoRoll.hpp"
 #include "gcem.hpp"
+#include "SwitchingKalmanFilter.hpp"
 
 using namespace std;
 
@@ -42,6 +43,7 @@ public:
 	int currentState_;
 	int previousState_;
 	double tickPerSec_;
+	double iniSecPerTick;
 	double initialTickPerSec_; // for reset score follower
 	double lastTickPerSec_;
 	double currentOnsetTime_;
@@ -68,21 +70,19 @@ public:
 	vector<vector<double>> PitchLP;
 	vector<vector<vector<double>>> InternalTrLP;
 	vector<double> TopTrLP;
-	double iniSecPerTick;
 	double logTrSkipLP;
-
-	static constexpr double Sig_t = gcem::pow(0.014, 2.);
-	double Sig_v;
-	double M_;
-	static constexpr std::array<double, 2> LPLambda_ = { gcem::log(0.95), gcem::log(0.95) };
-	std::array<double, 2> LPSwitch_;
-	std::array<double, 2> SwSecPerTick_;
-	std::array<double, 2> SwM_;
-	static constexpr std::array<double, 2> SwSig_t = { Sig_t,  gcem::pow(0.16, 2.) };
 
 	vector<double> pitchDiffProb_;
 
+	SwitchingKalmanFilter swk;
+
 	ScoreFollower(Hmm hmm_, double secPerQN)
+	 : hmm(hmm_),
+	   TPQN_(hmm.TPQN),
+	   iniSecPerTick(secPerQN / double(TPQN_)),
+	   initialTickPerSec_(1. / iniSecPerTick),
+	   lastTickPerSec_(initialTickPerSec_),
+   	   swk(initialTickPerSec_, TPQN_)
 	{
 		vector<int> v(100);
 		vector<double> d(100);
@@ -93,9 +93,6 @@ public:
 		vector<vector<string>> vvs;
 		vector<int> vpitch;
 		vector<string> vref;
-
-		hmm = hmm_;
-		TPQN_ = hmm.TPQN;
 
 		int curTopId = -1;
 		for (int n = 0; n < hmm.evts.size(); n += 1)
@@ -151,9 +148,7 @@ public:
 		assert(nState_ >= 1);
 		like_.resize(nState_);
 		assert((int)like_.size() == nState_);
-		iniSecPerTick = secPerQN / double(TPQN_);
-		initialTickPerSec_ = 1. / iniSecPerTick;
-		lastTickPerSec_ = initialTickPerSec_;
+
 		// cout<<"nState_ nTopState: "<<nState_<<"\t"<<TopId[nState_-1]<<endl;
 
 		/////////////// trill overlaps
@@ -460,14 +455,6 @@ public:
 		tickPerSec_ = initialTickPerSec_;
 		tempo_.clear();
 		tempo_.push_back(tickPerSec_);
-		M_ = gcem::pow(0.2 / tickPerSec_, 2.);
-		Sig_v = gcem::pow(0.03 / (tickPerSec_ * TPQN_), 2.);
-		LPSwitch_[0] = gcem::log(0.95);
-		LPSwitch_[1] = gcem::log(0.05);
-		SwSecPerTick_[0] = 1. / tickPerSec_;
-		SwSecPerTick_[1] = 1. / tickPerSec_;
-		SwM_[0] = M_;
-		SwM_[1] = M_;
 
 		like_[0] = gcem::log(0.9);
 		for (int i = 1; i < nState_; i += 1)
@@ -563,34 +550,12 @@ public:
 	{
 		double ioi = time - previousOnsetTime_; // effective ioi (state-onset-time-interval)
 
-		////////////////////// switching Kalman filter
-
 		if (currentState_ > 0 && currentState_ == previousState_ + 1 && ioi > 0.035 && Type[currentState_] == "CH" && Type[currentState_ - 1] == "CH")
 		{
+			// apply Switching Kalman Filter
 			double nu = double(Stime[currentState_] - Stime[currentState_ - 1]);
-			double SwK[2][2];
-			double SwTmpPredSecPerTick[2][2];
-			double SwDelta[2][2];
-			vector<double> tmpLPSwitch(4); // 2*s_{m-1}+s_m=2*r+s
-			for (int r = 0; r < 2; r += 1)
-				for (int s = 0; s < 2; s += 1)
-				{
-					SwK[r][s] = nu * SwM_[r] / (nu * nu * SwM_[r] + SwSig_t[s]);
-					SwTmpPredSecPerTick[r][s] = SwSecPerTick_[r] + SwK[r][s] * (ioi - nu * SwSecPerTick_[r]);
-					SwDelta[r][s] = (1 - SwK[r][s] * nu) * SwM_[r];
-					tmpLPSwitch[2 * r + s] = LPLambda_[s] + LPSwitch_[r] - 0.5 * log(2 * M_PI * (nu * nu * SwM_[r] + SwSig_t[s])) - 0.5 * pow(ioi - nu * SwSecPerTick_[r], 2.) / (nu * nu * SwM_[r] + SwSig_t[s]);
-				} // endfor r,s
-			Lognorm(tmpLPSwitch);
-			for (int s = 0; s < 2; s += 1)
-			{
-				SwSecPerTick_[s] = (exp(tmpLPSwitch[s]) * SwTmpPredSecPerTick[0][s] + exp(tmpLPSwitch[2 + s]) * SwTmpPredSecPerTick[1][s]) / (exp(tmpLPSwitch[s]) + exp(tmpLPSwitch[2 + s]));
-				SwM_[s] = (exp(tmpLPSwitch[s]) * (SwDelta[0][s] + pow(SwSecPerTick_[s] - SwTmpPredSecPerTick[0][s], 2.)) + exp(tmpLPSwitch[2 + s]) * (SwDelta[1][s] + pow(SwSecPerTick_[s] - SwTmpPredSecPerTick[1][s], 2.))) / (exp(tmpLPSwitch[s]) + exp(tmpLPSwitch[2 + s]));
-				SwM_[s] += nu * nu * Sig_v;
-				LPSwitch_[s] = LogAdd(tmpLPSwitch[s], tmpLPSwitch[2 + s]);
-			} // endfor s
-			Lognorm(LPSwitch_);
-			tickPerSec_ = 1. / (SwSecPerTick_[0] * exp(LPSwitch_[0]) + SwSecPerTick_[1] * exp(LPSwitch_[1]));
-		} // endif
+			tickPerSec_ = swk.updateTicksPerSecond(nu, ioi);
+		}
 
 		assert(tickPerSec_ > 0);
 		if (currentState_ < nState_ - 1)
