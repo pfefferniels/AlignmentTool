@@ -138,22 +138,15 @@ public:
 
 	} // end ResetInternalPosition
 
-	bool IsDuplicate(string fmt1ID_)
+	bool IsDuplicate(string searchId) const
 	{
-		bool found = false;
-		for (int i = 0; i < duplicateOnsets.size(); i += 1)
-		{
-			for (int j = 1; j < duplicateOnsets[i].numOnsets; j += 1)
-			{
-				if (fmt1ID_ == duplicateOnsets[i].fmt1IDs[j])
-				{
-					found = true;
-					break;
-				} // endif
-			}	  // endfor j
-		}		  // endfor i
-		return found;
-	} // end IsDuplicate
+		for (const auto& duplicateOnset : duplicateOnsets) {
+			for (const auto& id : duplicateOnset.fmt1IDs) {
+				if (id == searchId) return true;
+			}
+		}
+		return false;
+	}
 };
 
 #endif // Hmm_HPP
