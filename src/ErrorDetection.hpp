@@ -92,8 +92,6 @@ ScorePerfmMatch detectErrors(const Fmt3x &fmt3, const Hmm &hmm, const ScorePerfm
 	vector<double> d(100);
 	vector<string> s(100);
 	stringstream ss;
-	clock_t start, end;
-	start = clock();
 
 	ScorePerfmMatch match = match_;
 

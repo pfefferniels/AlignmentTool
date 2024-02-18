@@ -635,7 +635,6 @@ public:
 				{
 					sig = 0.5 + (Stime[TopId[i]] - EndStime[TopId[j]]) * 0.2 / TPQN_;
 					mu = (Stime[TopId[i]] - EndStime[TopId[j]]) / tickPerSec_ - stolenTime[j];
-					double ioi2 = time - previousOnsetTime_;
 					if (mu < 0)
 					{
 						mu = 0;
