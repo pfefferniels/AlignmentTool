@@ -43,12 +43,10 @@ struct PianoRollEvt
 
 struct PianoRoll
 {
-	std::vector<std::string> comments;
 	std::vector<PianoRollEvt> evts;
 
 	void Clear()
 	{
-		comments.clear();
 		evts.clear();
 	}
 

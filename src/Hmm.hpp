@@ -46,14 +46,12 @@ public:
 struct Hmm
 {
 public:
-	vector<string> comments;
 	vector<HmmEvt> evts;
 	vector<DuplicateOnsetEvt> duplicateOnsets;
 	int TPQN;
 
 	void Clear()
 	{
-		comments.clear();
 		evts.clear();
 		duplicateOnsets.clear();
 	}

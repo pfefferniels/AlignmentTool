@@ -59,14 +59,12 @@ struct DuplicateOnsetEvtInFmt3x
 class Fmt3x
 {
 public:
-	std::vector<std::string> comments;
 	std::vector<Fmt3xEvt> evts;
 	std::vector<DuplicateOnsetEvtInFmt3x> duplicateOnsets;
 	int TPQN;
 
 	void Clear()
 	{
-		comments.clear();
 		evts.clear();
 		duplicateOnsets.clear();
 	}
