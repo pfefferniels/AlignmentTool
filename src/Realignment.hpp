@@ -756,7 +756,7 @@ public:
 				{
 					continue;
 				}
-				stable_sort(perfmClusterContent.begin(), perfmClusterContent.end(), LessPerfmNote());
+				stable_sort(perfmClusterContent.begin(), perfmClusterContent.end(), lessPitch);
 
 				vector<ScoreNote> scoreClusterContent;
 				{
@@ -773,7 +773,7 @@ public:
 						scoreClusterContent.push_back(scoreNote);
 					} // endfor j
 				}	  //
-				stable_sort(scoreClusterContent.begin(), scoreClusterContent.end(), LessScoreNote());
+				stable_sort(scoreClusterContent.begin(), scoreClusterContent.end(), lessPitch);
 
 				if (printOn)
 				{

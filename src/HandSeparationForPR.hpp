@@ -75,13 +75,11 @@ public:
 
 		// Assume a tenth (15 semitones) to be the maximum hand stretch
 		int maximumStretch = 15;
-		int handPartPreference[length][2]; // HandPartPreference[m][0]=1 if m-th note is likely to be in the right-hand-part
-		vector<int> pitches;
+		std::vector<std::array<int, 2>> handPartPreference(length, { 0, 0 });
+		std::vector<int> pitches;
 		for (int n = 0; n < length; n++)
 		{
 			PianoRollEvt evt = pr.evts[n];
-			handPartPreference[n][0] = 0;
-			handPartPreference[n][1] = 0;
 			int p_cur = evt.pitch;
 			int p_max = p_cur;
 			int p_min = p_cur;

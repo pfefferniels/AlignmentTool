@@ -7,10 +7,12 @@
 #include <random>
 #include <climits>
 #include <numeric>
+#include <concepts>
 
 inline double LogAdd(double d1, double d2)
 {
-	if (d1 > d2) return d1 + log(1 + exp(d2 - d1));
+	if (d1 > d2)
+		return d1 + log(1 + exp(d2 - d1));
 
 	return d2 + log(1 + exp(d1 - d2));
 }
@@ -28,7 +30,8 @@ inline void Norm(std::vector<double> &vd)
 	}
 }
 
-inline void Lognorm(std::vector<double> &vd)
+template<std::ranges::range R>
+inline void Lognorm(R& vd)
 {
 	double tmpd = vd[0];
 	for (int i = 0; i < vd.size(); i += 1)
@@ -38,7 +41,7 @@ inline void Lognorm(std::vector<double> &vd)
 			tmpd = vd[i];
 		}
 	}
-	
+
 	for (int i = 0; i < vd.size(); i += 1)
 	{
 		vd[i] -= tmpd;

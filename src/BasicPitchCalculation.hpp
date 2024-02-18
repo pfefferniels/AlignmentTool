@@ -144,4 +144,5 @@ int SitchToPitch(std::string sitch)
 	}
 	return p;
 }
+
 #endif // BASICPITCHCALCULATION_HPP

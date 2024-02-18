@@ -21,6 +21,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include "Hmm.hpp"
 #include "ScorePerfmMatch.hpp"
 #include "PianoRoll.hpp"
+#include "gcem.hpp"
 
 using namespace std;
 
@@ -54,7 +55,8 @@ public:
 	vector<vector<string>> scorePosList_;
 	vector<int> inputPitch_;
 	vector<double> timeHist;
-	int D1_, D2_;
+	static constexpr int D1_ = 3;
+	static constexpr int D2_ = 2;
 
 	vector<int> Stime, EndStime, TopId, BotId;
 	vector<string> Type;
@@ -69,12 +71,14 @@ public:
 	double iniSecPerTick;
 	double logTrSkipLP;
 
-	double Sig_t, Sig_v, M_;
-	double LPLambda_[2];
-	vector<double> LPSwitch_;
-	double SwSecPerTick_[2];
-	double SwM_[2];
-	double SwSig_t[2];
+	static constexpr double Sig_t = gcem::pow(0.014, 2.);
+	double Sig_v;
+	double M_;
+	static constexpr std::array<double, 2> LPLambda_ = { gcem::log(0.95), gcem::log(0.95) };
+	std::array<double, 2> LPSwitch_;
+	std::array<double, 2> SwSecPerTick_;
+	std::array<double, 2> SwM_;
+	static constexpr std::array<double, 2> SwSig_t = { Sig_t,  gcem::pow(0.16, 2.) };
 
 	vector<double> pitchDiffProb_;
 
@@ -456,29 +460,21 @@ public:
 		tickPerSec_ = initialTickPerSec_;
 		tempo_.clear();
 		tempo_.push_back(tickPerSec_);
-		M_ = pow(0.2 / tickPerSec_, 2.);
-		Sig_t = pow(0.014, 2.); //
-		Sig_v = pow(0.03 / (tickPerSec_ * TPQN_), 2.);
-		SwSig_t[0] = Sig_t;
-		SwSig_t[1] = pow(0.16, 2.);
-		LPLambda_[0] = log(0.95);
-		LPLambda_[1] = log(0.05);
-		LPSwitch_.resize(2);
-		LPSwitch_[0] = log(0.95);
-		LPSwitch_[1] = log(0.05);
+		M_ = gcem::pow(0.2 / tickPerSec_, 2.);
+		Sig_v = gcem::pow(0.03 / (tickPerSec_ * TPQN_), 2.);
+		LPSwitch_[0] = gcem::log(0.95);
+		LPSwitch_[1] = gcem::log(0.05);
 		SwSecPerTick_[0] = 1. / tickPerSec_;
 		SwSecPerTick_[1] = 1. / tickPerSec_;
 		SwM_[0] = M_;
 		SwM_[1] = M_;
 
-		like_[0] = log(0.9);
+		like_[0] = gcem::log(0.9);
 		for (int i = 1; i < nState_; i += 1)
 		{
 			like_[i] = log(0.1 / (nState_ - 1));
 		} // endfor i
 
-		D1_ = 3;
-		D2_ = 2;
 		vector<double> evtProb(D1_ + D2_ + 1); //-D1,...,D2
 		TopTrLP.assign(D1_ + D2_ + 1, -100);
 		double gammabar;

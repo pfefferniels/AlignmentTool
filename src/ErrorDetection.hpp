@@ -40,12 +40,9 @@ struct ScoreNote
 	}
 };
 
-struct LessScoreNote
+auto lessPitch = []<typename T>(const T &a, const T &b)
 {
-	bool operator()(const ScoreNote &a, const ScoreNote &b)
-	{
-		return a.pitch < b.pitch;
-	}
+	return a.pitch < b.pitch;
 };
 
 struct PerfmNote
@@ -58,14 +55,6 @@ struct PerfmNote
 	void Print()
 	{
 		cout << "pitch,noteID,noteStatus,scoreNoteRef : " << pitch << "\t" << noteID << "\t" << noteStatus << "\t" << scoreNoteRef << endl;
-	}
-};
-
-struct LessPerfmNote
-{
-	bool operator()(const PerfmNote &a, const PerfmNote &b)
-	{
-		return a.pitch < b.pitch;
 	}
 };
 
@@ -404,7 +393,7 @@ ScorePerfmMatch detectErrors(const Fmt3x &fmt3, const Hmm &hmm, const ScorePerfm
 				} // endfor k
 			}	  // endfor j
 		}		  //
-		stable_sort(scoreClusterContent.begin(), scoreClusterContent.end(), LessScoreNote());
+		stable_sort(scoreClusterContent.begin(), scoreClusterContent.end(), lessPitch);
 
 		vector<PerfmNote> perfmClusterContent;
 		{
@@ -417,7 +406,7 @@ ScorePerfmMatch detectErrors(const Fmt3x &fmt3, const Hmm &hmm, const ScorePerfm
 				perfmClusterContent.push_back(perfmNote);
 			} // endfor m
 		}	  //
-		stable_sort(perfmClusterContent.begin(), perfmClusterContent.end(), LessPerfmNote());
+		stable_sort(perfmClusterContent.begin(), perfmClusterContent.end(), lessPitch);
 
 		if (printOn)
 		{

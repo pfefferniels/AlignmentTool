@@ -56,7 +56,7 @@ public:
 		comments.clear();
 		evts.clear();
 		duplicateOnsets.clear();
-	} // end Clear
+	}
 
 	void ConvertFromFmt3x(Fmt3x fmt3x)
 	{

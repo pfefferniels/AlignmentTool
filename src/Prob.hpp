@@ -49,9 +49,8 @@ public:
 	{
 		LP.clear();
 		LP.resize(P.size());
-		for (int i = 0; i < P.size(); i += 1)
-		{
-			LP[i] = log(P[i]);
+		for (auto& p : P) {
+			LP.push_back(log(p));
 		}
 	}
 
