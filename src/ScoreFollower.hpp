@@ -84,7 +84,6 @@ public:
 	   lastTickPerSec_(initialTickPerSec_),
    	   swk(initialTickPerSec_, TPQN_)
 	{
-		vector<int> v(100);
 		vector<double> d(100);
 		vector<string> s(100);
 		vector<int> vi;
