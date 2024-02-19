@@ -76,7 +76,7 @@ double errLP(int pitchError)
 	{
 		return -6.0533399; // ln(0.0047/2.)
 	}
-	else if (pitchError > -12 || pitchError < 12)
+	else if (pitchError > -12 && pitchError < 12)
 	{
 		return -7.6818715; // ln(0.0083/9./2.)
 	}
