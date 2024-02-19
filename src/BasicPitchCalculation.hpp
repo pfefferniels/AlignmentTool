@@ -3,10 +3,11 @@
 
 #include <string>
 #include <sstream>
+#include <unordered_map>
 
 /**
  * Transforms MIDI pitch to spelled pitch (sitch)
- */ 
+ */
 std::string PitchToSitch(int p)
 {
 	if (p < 0)
@@ -62,86 +63,58 @@ std::string PitchToSitch(int p)
 
 /**
  * Transforms spelled pitch to MIDI pitch.
+ * @returns -1 if the provided sitch is invalid.
  */
 int SitchToPitch(std::string sitch)
 {
-	if (sitch == "R")
-	{
-		return -1;
-	}
-	if (sitch == "rest")
-	{
-		return -1;
-	}
-	int p_rel, p;
-	if (sitch[0] == 'C')
-	{
-		p_rel = 60;
-	}
-	else if (sitch[0] == 'D')
-	{
-		p_rel = 62;
-	}
-	else if (sitch[0] == 'E')
-	{
-		p_rel = 64;
-	}
-	else if (sitch[0] == 'F')
-	{
-		p_rel = 65;
-	}
-	else if (sitch[0] == 'G')
-	{
-		p_rel = 67;
-	}
-	else if (sitch[0] == 'A')
-	{
-		p_rel = 69;
-	}
-	else if (sitch[0] == 'B')
-	{
-		p_rel = 71;
-	}
+	if (sitch.empty()) return -1;
+	if (sitch == "R" || sitch == "rest") return -1; 
+
+    std::unordered_map<char, int> pitchMap = {
+        {'C', 60},
+        {'D', 62},
+        {'E', 64},
+        {'F', 65},
+        {'G', 67},
+        {'A', 69},
+        {'B', 71}
+    };
+
+    int p_rel;
+
+    auto it = pitchMap.find(sitch[0]);
+    if (it != pitchMap.end()) {
+        p_rel = it->second;
+    } else {
+        std::cerr << "Invalid sitch " << sitch[0] << std::endl;
+        return -1;
+    }
 	sitch.erase(sitch.begin());
-	int oct = sitch[sitch.size() - 1] - '0';
-	sitch.erase(sitch.end() - 1);
-	p = p_rel + (oct - 4) * 12;
-	if (sitch == "")
-	{
-		p += 0;
-	}
-	else if (sitch == "#")
-	{
-		p += 1;
-	}
-	else if (sitch == "##")
-	{
-		p += 2;
-	}
-	else if (sitch == "b")
-	{
-		p -= 1;
-	}
-	else if (sitch == "bb")
-	{
-		p -= 2;
-	}
-	else if (sitch == "+")
+
+    // Extract the last character as the octave
+	// and remove it.
+    int oct = sitch.back() - '0';
+    sitch.pop_back();
+	
+	int p = p_rel + (oct - 4) * 12;
+
+	if (sitch == "#" || sitch == "+")
 	{
 		p += 1;
 	}
-	else if (sitch == "++")
+	else if (sitch == "##" || sitch == "++")
 	{
 		p += 2;
 	}
-	else if (sitch == "-")
+	else if (sitch == "b" || sitch == "-")
 	{
 		p -= 1;
 	}
-	else if (sitch == "--")
+	else if (sitch == "bb" || sitch == "--")
 	{
 		p -= 2;
 	}
+
 	return p;
 }
 
