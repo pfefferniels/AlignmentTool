@@ -388,7 +388,7 @@ public:
 			perfmIDs.push_back(n);
 		} // endfor n
 	}
-	
+
 	void Viterbi()
 	{
 		if (printOn)
@@ -789,7 +789,7 @@ public:
 					{
 						perfmClusterContent[m].Print();
 					} // endfor m
-					// ####################################################################################
+					  // ####################################################################################
 				}
 
 				/// Select best synchronised performed note for each pitch -> others are extra notes
@@ -860,7 +860,7 @@ public:
 					{
 						perfmClusterContent[m].Print();
 					} // endfor m
-					// ####################################################################################
+					  // ####################################################################################
 				}
 
 				/// Identify pitch error or extra note
@@ -1456,7 +1456,7 @@ ScorePerfmMatch realign(const Fmt3x &fmt3x_, const Hmm &hmm_, const ScorePerfmMa
 	vector<int> pitchErrPos;
 	vector<int> extraNotePos;
 	vector<int> reorderdNotePos;
-	std::vector<std::tuple<int,int>> missNoteIDs;
+	std::vector<std::tuple<int, int>> missNoteIDs;
 
 	int preStime = -1;
 	vector<int> stimes;
@@ -1535,18 +1535,12 @@ ScorePerfmMatch realign(const Fmt3x &fmt3x_, const Hmm &hmm_, const ScorePerfmMa
 	mohmm.SetScorePerfmMatch(match);
 	mohmm.SetHmm(hmm);
 
-	for (int i = 0; i < errRegions.regions.size(); i += 1)
+	for (size_t i = 0; i < errRegions.regions.size(); i++)
 	{
-
-		/// Select regions
-		bool includePitchErr = false;
-		bool includeExtraNote = false;
-		bool includeMissNote = false;
-		bool includeReorderedNote = false;
-		includePitchErr = pitchErrRegions.IsOverlapping(errRegions.regions[i]);
-		includeExtraNote = extraNoteRegions.IsOverlapping(errRegions.regions[i]);
-		includeMissNote = missNoteRegions.IsOverlapping(errRegions.regions[i]);
-		includeReorderedNote = reorderdNoteRegions.IsOverlapping(errRegions.regions[i]);
+		// Select regions
+		bool includePitchErr = pitchErrRegions.IsOverlapping(errRegions.regions[i]);
+		bool includeExtraNote = extraNoteRegions.IsOverlapping(errRegions.regions[i]);
+		bool includeMissNote = missNoteRegions.IsOverlapping(errRegions.regions[i]);
 
 		int maxStime = fmt3x.evts[0].stime;
 		int minStime = fmt3x.evts[fmt3x.evts.size() - 1].stime;
