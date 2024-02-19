@@ -34,7 +34,7 @@ struct Observation
 
 class ScoreFollower
 {
-public:
+private:
 	Hmm hmm; // score infomation
 	int TPQN_;
 	bool isFirst_;
@@ -76,6 +76,7 @@ public:
 
 	SwitchingKalmanFilter swk;
 
+public:
 	ScoreFollower(Hmm hmm_, double secPerQN)
 	 : hmm(hmm_),
 	   TPQN_(hmm.TPQN),
