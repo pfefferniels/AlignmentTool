@@ -88,7 +88,6 @@ public:
 		vector<double> d(100);
 		vector<string> s(100);
 		vector<int> vi;
-		vector<vector<int>> vvi;
 		vector<string> vs;
 		vector<vector<string>> vvs;
 		vector<int> vpitch;
@@ -107,17 +106,17 @@ public:
 			BotId.push_back(hmm.evts[n].internalPosition);
 			Type.push_back(hmm.evts[n].stateType);
 
-			vvi.clear();
-			for (int i = 0; i < hmm.evts[n].numClusters; i += 1)
+			std::vector<std::vector<int>> pitchCluster;
+			for (size_t i = 0; i < hmm.evts[n].numClusters; i++)
 			{
-				vi.clear();
-				for (int j = 0; j < hmm.evts[n].numNotesPerCluster[i]; j += 1)
+				std::vector<int> pitches;
+				for (size_t j = 0; j < hmm.evts[n].numNotesPerCluster[i]; j++)
 				{
-					vi.push_back(SitchToPitch(hmm.evts[n].sitchesPerCluster[i][j]));
-				} // endfor j
-				vvi.push_back(vi);
-			} // endfor i
-			PitchClusters.push_back(vvi);
+					pitches.push_back(SitchToPitch(hmm.evts[n].sitchesPerCluster[i][j]));
+				}
+				pitchCluster.push_back(pitches);
+			}
+			PitchClusters.push_back(pitchCluster);
 			VoiceClusters.push_back(hmm.evts[n].voicesPerCluster);
 			RefClusters.push_back(hmm.evts[n].fmt1IDsPerCluster);
 
